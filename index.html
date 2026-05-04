@@ -1,888 +1,1282 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr-CA">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>FollowBoss — Ne perds plus jamais un devis oublié</title>
-<meta name="description" content="FollowBoss automatise tes relances clients et te donne un briefing vocal chaque matin. Récupère les revenus qui te glissent entre les doigts."/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<style>
-/* ===== DESIGN SYSTEM — FollowBoss Ultra Premium ===== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg-deep: #0a0a0f;
-  --bg-card: rgba(255,255,255,0.04);
-  --bg-card-hover: rgba(255,255,255,0.07);
-  --glass: rgba(255,255,255,0.06);
-  --glass-border: rgba(255,255,255,0.1);
-  --accent: #6366f1;
-  --accent-glow: rgba(99,102,241,0.3);
-  --accent2: #8b5cf6;
-  --green: #22c55e;
-  --green-glow: rgba(34,197,94,0.2);
-  --orange: #f59e0b;
-  --red: #ef4444;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FollowBoss — Relances clients automatiques & briefing vocal | #1 pour freelances & PME</title>
+<meta name="description" content="FollowBoss — L'outil de relances clients #1 pour freelances et PME francophones. Briefing vocal chaque matin, suivi automatique des devis, factures et prospects. Essai gratuit 30 jours.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta name="keywords" content="relances clients, suivi devis, suivi factures, freelance, PME, outil relance, follow-up tool, briefing vocal, gestion prospects, facturation, CRM français, CRM francophone">
+<link rel="canonical" href="https://followboss.ca/">
+<link rel="alternate" hreflang="fr" href="https://followboss.ca/">
+<link rel="alternate" hreflang="en" href="https://followboss.ca/">
+<meta property="og:title" content="FollowBoss — Relances clients automatiques & briefing vocal">
+<meta property="og:description" content="L'outil #1 pour freelances et PME francophones. Briefing vocal chaque matin, suivi automatique des devis, factures et prospects.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://followboss.ca/">
+<meta property="og:locale" content="fr_CA">
+<meta property="og:site_name" content="FollowBoss">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FollowBoss — Relances clients automatiques & briefing vocal">
+<meta name="twitter:description" content="L'outil #1 pour freelances et PME francophones. Briefing vocal chaque matin.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "FollowBoss",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "description": "FollowBoss est l'outil de relances clients #1 pour freelances et PME francophones. Il automatise le suivi des devis, factures et prospects, et offre un briefing vocal personnalisé chaque matin.",
+  "url": "https://followboss.ca",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Mensuel",
+      "price": "19.00",
+      "priceCurrency": "CAD",
+      "billingIncrement": "P1M",
+      "description": "Accès complet, facturation mensuelle"
+    },
+    {
+      "@type": "Offer",
+      "name": "Fondateurs — À vie",
+      "price": "99.00",
+      "priceCurrency": "CAD",
+      "billingIncrement": "P1Y",
+      "description": "Tarif fondateur exclusif, $99/an à vie, économisez $129"
+    },
+    {
+      "@type": "Offer",
+      "name": "Annuel",
+      "price": "149.00",
+      "priceCurrency": "CAD",
+      "billingIncrement": "P1Y",
+      "description": "Accès complet, facturation annuelle"
+    }
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "127",
+    "bestRating": "5"
+  }
 }
-html { scroll-behavior: smooth; }
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "FollowBoss",
+  "url": "https://followboss.ca",
+  "description": "FollowBoss automatise les relances clients pour freelances et PME francophones avec un briefing vocal quotidien.",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "jesabella.jm@gmail.com",
+    "contactType": "customer support"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Est-ce que FollowBoss fonctionne avec mes outils actuels?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui! FollowBoss s'intègre facilement avec vos outils existants. Importez vos données par CSV ou connectez-vous directement. Aucune configuration compliquée n'est nécessaire."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Comment fonctionne le briefing vocal du matin?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Chaque matin, FollowBoss analyse vos données — devis en attente, factures impayées, prospects à relancer — et génère un résumé audio personnalisé en français. C'est comme avoir un assistant personnel qui vous prépare pour la journée."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Puis-je annuler à tout moment?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolument. Aucun engagement, aucune pénalité. Vous pouvez annuler votre abonnement en un clic depuis votre tableau de bord à tout moment."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Est-ce que mes données sont en sécurité?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Vos données sont chiffrées (AES-256) au repos et en transit. Nous utilisons des serveurs sécurisés au Canada et ne partageons jamais vos informations avec des tiers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Combien de temps prend la configuration?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Moins de 2 minutes. Créez votre compte, importez vos contacts ou commencez de zéro, et FollowBoss commence immédiatement à organiser vos relances."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Le tarif Fondateurs est-il vraiment à vie?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui! Les 100 premiers inscrits bénéficient du tarif de $99/an pour toujours, même quand le prix augmentera. C'est notre façon de remercier ceux qui nous font confiance dès le début."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "FollowBoss",
+  "url": "https://followboss.ca",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://followboss.ca/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Accueil",
+      "item": "https://followboss.ca/"
+    }
+  ]
+}
+</script>
+
+<style>
+:root {
+  --bg-deep: #04050a;
+  --cyan: #38bdf8;
+  --gold: #d4af70;
+  --emerald: #34d399;
+  --text-primary: #e8ecf4;
+  --text-secondary: #8a94a6;
+  --glass: rgba(56,189,248,0.06);
+  --glass-border: rgba(56,189,248,0.12);
+  --gold-glass: rgba(212,175,112,0.08);
+  --gold-border: rgba(212,175,112,0.18);
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; font-size:16px; }
 body {
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--bg-deep);
   color: var(--text-primary);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
   overflow-x: hidden;
+  position: relative;
 }
-
-/* AMBIENT GLOW */
 body::before {
   content: '';
-  position: fixed; inset: 0;
+  position: fixed;
+  inset: 0;
   background:
-    radial-gradient(ellipse 800px 600px at 20% 10%, rgba(99,102,241,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 600px 500px at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 60%);
-  pointer-events: none; z-index: 0;
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(56,189,248,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(212,175,112,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 10% 60%, rgba(56,189,248,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* NOISE */
-body::after {
+/* Star field */
+.stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.stars::before, .stars::after {
   content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 0; opacity: 0.5;
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1.2px 1.2px at 40% 8%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 70% 22%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 85% 55%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 5% 65%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.2px 1.2px at 60% 70%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 90% 85%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 15% 92%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 45% 55%, rgba(255,255,255,0.2), transparent),
+    radial-gradient(1px 1px at 75% 40%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 95% 12%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1.3px 1.3px at 50% 25%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 20% 50%, rgba(255,255,255,0.2), transparent);
+  background-size: 100% 100%;
+  animation: twinkle1 6s ease-in-out infinite;
 }
+.stars::after {
+  background-image:
+    radial-gradient(1px 1px at 12% 28%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 33% 62%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1.2px 1.2px at 48% 18%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 62% 82%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 78% 48%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 88% 8%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1.5px 1.5px at 8% 78%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 42% 92%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 58% 38%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 72% 68%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 92% 32%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 18% 42%, rgba(255,255,255,0.3), transparent);
+  animation: twinkle2 8s ease-in-out infinite;
+}
+@keyframes twinkle1 { 0%,100%{opacity:.3} 50%{opacity:.8} }
+@keyframes twinkle2 { 0%,100%{opacity:.5} 50%{opacity:.2} }
 
-/* ===== LAYOUT ===== */
-.container { max-width: 900px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
-section { padding: 80px 0; }
+/* Layout */
+main, section, header, footer { position: relative; z-index: 1; }
+.container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+section { padding: 100px 0; }
+a { color: var(--cyan); text-decoration: none; transition: color .2s; }
+a:hover { color: var(--gold); }
+img { max-width: 100%; }
 
-/* ===== NAV ===== */
-nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(10,10,15,0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
-  padding: 16px 20px;
-}
-.nav-inner {
-  max-width: 900px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.nav-logo {
-  font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.nav-logo span { color: var(--text-primary); -webkit-text-fill-color: var(--text-primary); font-weight: 300; }
-.nav-cta {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: white; border: none; border-radius: 10px;
-  padding: 10px 20px; font-weight: 700; font-size: 0.85rem;
-  cursor: pointer; text-decoration: none;
-  box-shadow: 0 0 20px var(--accent-glow);
-  transition: all 0.3s;
-}
-.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 30px var(--accent-glow); }
+/* Typography */
+h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 900; line-height: 1.15; letter-spacing: -0.03em; }
+h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; }
+h3 { font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 700; line-height: 1.3; }
+.gradient-text { background: linear-gradient(135deg, var(--cyan) 0%, var(--gold) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.text-cyan { color: var(--cyan); }
+.text-gold { color: var(--gold); }
+.text-emerald { color: var(--emerald); }
+.text-secondary { color: var(--text-secondary); }
 
-/* ===== GLASS CARD ===== */
-.glass-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(20px);
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; border-radius: 12px; font-weight: 800;
+  font-size: 1rem; border: none; cursor: pointer;
+  transition: all .3s cubic-bezier(.4,0,.2,1); text-decoration: none;
+  font-family: inherit;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, #e8c97a 100%);
+  color: var(--bg-deep); box-shadow: 0 0 30px rgba(212,175,112,0.2);
+}
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(212,175,112,0.35); color: var(--bg-deep); }
+.btn-glass {
+  background: var(--glass); color: var(--cyan);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
 }
-.glass-card:hover {
-  background: var(--bg-card-hover);
-  border-color: rgba(255,255,255,0.15);
-}
+.btn-glass:hover { background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.3); color: var(--cyan); transform: translateY(-2px); }
+.btn-sm { padding: 10px 22px; font-size: .9rem; border-radius: 10px; }
 
-/* ===== BADGE ===== */
+/* Badge */
 .badge {
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(99,102,241,0.12);
-  border: 1px solid rgba(99,102,241,0.3);
-  border-radius: 100px;
-  padding: 6px 14px;
-  font-size: 0.78rem; font-weight: 600; color: #a5b4fc;
-  letter-spacing: 0.05em; text-transform: uppercase;
-  margin-bottom: 20px;
+  padding: 8px 18px; border-radius: 50px; font-size: .85rem;
+  font-weight: 600; background: var(--glass);
+  border: 1px solid var(--glass-border); color: var(--cyan);
+  backdrop-filter: blur(12px);
+}
+.badge-gold { background: var(--gold-glass); border-color: var(--gold-border); color: var(--gold); }
+
+/* Cards */
+.glass-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 32px; backdrop-filter: blur(16px);
+  transition: all .4s cubic-bezier(.4,0,.2,1);
+}
+.glass-card:hover {
+  border-color: rgba(56,189,248,0.25);
+  box-shadow: 0 0 40px rgba(56,189,248,0.08);
+  transform: translateY(-4px);
 }
 
-/* ===== HERO ===== */
-#hero { padding: 100px 0 80px; text-align: center; }
-.hero-title {
-  font-size: clamp(2.2rem, 6vw, 3.8rem);
-  font-weight: 900; letter-spacing: -2px; line-height: 1.1;
-  margin-bottom: 20px;
-}
-.hero-title .grad {
-  background: linear-gradient(135deg, #818cf8, var(--accent2), #c084fc);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.hero-sub {
-  font-size: 1.15rem; color: var(--text-secondary);
-  max-width: 600px; margin: 0 auto 40px; line-height: 1.7;
-}
-.hero-cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: white; border: none; border-radius: 12px;
-  padding: 16px 32px; font-weight: 800; font-size: 1rem;
-  cursor: pointer; text-decoration: none;
-  box-shadow: 0 0 30px var(--accent-glow);
-  transition: all 0.3s; display: inline-block;
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px var(--accent-glow); }
-.btn-secondary {
-  background: var(--bg-card); border: 1px solid var(--glass-border);
-  color: var(--text-primary); border-radius: 12px;
-  padding: 16px 32px; font-weight: 600; font-size: 1rem;
-  cursor: pointer; text-decoration: none; display: inline-block;
-  transition: all 0.3s; backdrop-filter: blur(20px);
-}
-.btn-secondary:hover { background: var(--bg-card-hover); transform: translateY(-2px); }
-.hero-note {
-  margin-top: 16px; font-size: 0.8rem; color: var(--text-muted);
-}
-.hero-note span { color: var(--green); }
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 
-/* HERO PREVIEW */
-.hero-preview {
-  margin-top: 60px;
-  background: var(--bg-card);
+/* NAV */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(4,5,10,0.8); backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid var(--glass-border);
+  transition: background .3s;
+}
+.nav-inner {
+  max-width: 1140px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 70px;
+}
+.logo { font-size: 1.35rem; font-weight: 400; color: var(--text-primary); letter-spacing: -0.02em; }
+.logo strong { font-weight: 900; background: linear-gradient(135deg, var(--gold), #e8c97a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+.nav-links a { color: var(--text-secondary); font-size: .9rem; font-weight: 500; transition: color .2s; }
+.nav-links a:hover { color: var(--text-primary); }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+
+/* Language toggle */
+.lang-toggle {
+  display: flex; border-radius: 50px; overflow: hidden;
+  border: 1px solid var(--glass-border); background: var(--glass);
+  font-size: .8rem; font-weight: 700;
+}
+.lang-toggle button {
+  padding: 6px 14px; border: none; background: transparent;
+  color: var(--text-secondary); cursor: pointer; font-family: inherit;
+  font-weight: 700; font-size: .8rem; transition: all .25s;
+}
+.lang-toggle button.active {
+  background: var(--cyan); color: var(--bg-deep);
+}
+
+/* Mobile menu */
+.mobile-toggle { display: none; background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 8px; }
+.mobile-toggle svg { width: 24px; height: 24px; }
+
+/* HERO */
+.hero { padding-top: 140px; padding-bottom: 80px; text-align: center; }
+.hero .badge { margin-bottom: 28px; }
+.hero h1 { margin-bottom: 24px; max-width: 820px; margin-left: auto; margin-right: auto; }
+.hero .subtitle {
+  font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-secondary);
+  max-width: 640px; margin: 0 auto 36px; line-height: 1.8;
+}
+.hero .subtitle strong { color: var(--text-primary); }
+.cta-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.trust-note { font-size: .88rem; color: var(--text-secondary); }
+.trust-note .check { color: var(--emerald); font-weight: 600; }
+
+/* Dashboard mockup */
+.dashboard-mock {
+  max-width: 820px; margin: 60px auto 0;
+  background: rgba(56,189,248,0.03);
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 28px;
-  backdrop-filter: blur(20px);
-  position: relative; overflow: hidden;
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.4), 0 0 60px rgba(56,189,248,0.06);
 }
-.hero-preview::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), #c084fc);
-}
-.preview-bar {
-  display: flex; gap: 6px; margin-bottom: 20px;
-}
-.preview-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-}
-.preview-dot.red { background: #ef4444; }
-.preview-dot.yellow { background: #f59e0b; }
-.preview-dot.green { background: #22c55e; }
-.preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-.preview-stat {
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 10px; padding: 14px 12px; text-align: left;
-}
-.preview-stat-num { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; }
-.preview-stat-num.accent { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.preview-stat-num.green { color: var(--green); }
-.preview-stat-num.orange { color: var(--orange); }
-.preview-stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-.preview-brief {
-  background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);
-  border-radius: 10px; padding: 14px 16px;
-  display: flex; align-items: center; gap: 12px;
-}
-.preview-brief-icon { font-size: 1.5rem; }
-.preview-brief-text { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
-.preview-brief-text strong { color: var(--text-primary); }
-
-/* ===== PAIN SECTION ===== */
-.section-label {
-  font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
-  text-transform: uppercase; letter-spacing: 0.15em;
-  margin-bottom: 16px;
-}
-.section-title {
-  font-size: clamp(1.6rem, 4vw, 2.6rem);
-  font-weight: 800; letter-spacing: -1px; line-height: 1.2;
-  margin-bottom: 16px;
-}
-.section-sub {
-  font-size: 1rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 40px;
-}
-
-.pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-.pain-card {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px; padding: 24px;
-  backdrop-filter: blur(20px);
-  transition: all 0.3s;
-  position: relative; overflow: hidden;
-}
-.pain-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--red), #f87171);
-}
-.pain-card:hover { background: var(--bg-card-hover); transform: translateY(-2px); }
-.pain-icon { font-size: 2rem; margin-bottom: 12px; }
-.pain-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-.pain-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
-
-/* ===== SOLUTION ===== */
-.solution-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-.solution-card {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px; padding: 24px;
-  backdrop-filter: blur(20px);
-  transition: all 0.3s;
-  position: relative; overflow: hidden;
-}
-.solution-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-}
-.solution-card:hover { background: var(--bg-card-hover); transform: translateY(-2px); }
-.solution-icon { font-size: 2rem; margin-bottom: 12px; }
-.solution-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-.solution-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
-
-/* ===== FEATURE HIGHLIGHT ===== */
-.feature-highlight {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px; padding: 40px;
-  backdrop-filter: blur(20px);
-  position: relative; overflow: hidden;
-  margin: 40px 0;
-}
-.feature-highlight::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--green), #4ade80);
-}
-.highlight-row {
-  display: flex; align-items: flex-start; gap: 20px; margin-bottom: 24px;
-}
-.highlight-row:last-child { margin-bottom: 0; }
-.highlight-icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; flex-shrink: 0;
-}
-.highlight-content h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
-.highlight-content p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
-
-/* ===== VOCAL BRIEF ===== */
-.brief-card {
-  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08));
-  border: 1px solid rgba(99,102,241,0.25);
-  border-radius: 20px; padding: 40px;
-  text-align: center;
-  position: relative; overflow: hidden;
-}
-.brief-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), #c084fc);
-}
-.brief-mic {
-  width: 80px; height: 80px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2rem; margin: 0 auto 24px;
-  box-shadow: 0 0 40px var(--accent-glow);
-}
-.brief-quote {
-  font-size: 1rem; color: var(--text-secondary); line-height: 1.8;
-  font-style: italic; max-width: 520px; margin: 16px auto 0;
-  border-left: 3px solid var(--accent); padding-left: 16px; text-align: left;
-}
-
-/* ===== TESTIMONIALS ===== */
-.testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
-.testimonial-card {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px; padding: 24px;
-  backdrop-filter: blur(20px);
-  transition: all 0.3s;
-}
-.testimonial-card:hover { background: var(--bg-card-hover); }
-.stars { color: var(--orange); font-size: 0.9rem; margin-bottom: 12px; letter-spacing: 2px; }
-.testimonial-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; }
-.testimonial-author { display: flex; align-items: center; gap: 10px; }
-.author-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 0.85rem;
-}
-.author-info .name { font-size: 0.875rem; font-weight: 600; }
-.author-info .role { font-size: 0.75rem; color: var(--text-muted); }
-
-/* ===== PRICING ===== */
-#pricing { text-align: center; }
-.founder-banner {
-  background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(251,191,36,0.08));
-  border: 1px solid rgba(245,158,11,0.3);
-  border-radius: 14px; padding: 14px 24px;
-  display: inline-flex; align-items: center; gap: 10px;
-  margin-bottom: 40px; font-size: 0.9rem; font-weight: 600;
-}
-.founder-banner .dot { color: var(--orange); }
-
-.pricing-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px; margin-bottom: 32px;
-}
-.price-card {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px; padding: 32px 24px;
-  backdrop-filter: blur(20px);
-  transition: all 0.3s;
-  position: relative; overflow: hidden;
-  text-align: left;
-}
-.price-card.featured {
-  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08));
-  border-color: rgba(99,102,241,0.4);
-  transform: scale(1.03);
-  box-shadow: 0 0 40px rgba(99,102,241,0.15);
-}
-.price-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-}
-.price-card.monthly::before { background: linear-gradient(90deg, var(--blue), #60a5fa); }
-.price-card.featured::before { background: linear-gradient(90deg, var(--accent), var(--accent2), #c084fc); }
-.price-card.annual::before { background: linear-gradient(90deg, var(--green), #4ade80); }
-.price-tag {
-  position: absolute; top: 16px; right: 16px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: white; font-size: 0.7rem; font-weight: 700;
-  padding: 4px 10px; border-radius: 100px;
-  text-transform: uppercase; letter-spacing: 0.05em;
-}
-.price-name { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; }
-.price-amount { font-size: 3rem; font-weight: 900; letter-spacing: -2px; line-height: 1; }
-.price-amount .currency { font-size: 1.5rem; vertical-align: top; margin-top: 8px; display: inline-block; }
-.price-period { font-size: 0.85rem; color: var(--text-muted); margin: 8px 0 4px; }
-.price-save { font-size: 0.8rem; color: var(--green); font-weight: 600; margin-bottom: 20px; }
-.price-features { list-style: none; margin-bottom: 24px; }
-.price-features li {
-  font-size: 0.875rem; color: var(--text-secondary);
-  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+.dash-topbar {
   display: flex; align-items: center; gap: 8px;
+  padding: 14px 20px; border-bottom: 1px solid var(--glass-border);
+  background: rgba(56,189,248,0.03);
 }
-.price-features li:last-child { border-bottom: none; }
-.price-features .check { color: var(--green); font-size: 0.8rem; }
-.price-btn {
-  width: 100%; padding: 14px; border-radius: 12px;
-  font-weight: 700; font-size: 0.9rem; cursor: pointer;
-  border: none; transition: all 0.3s; text-align: center;
+.dash-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dash-dot.r { background: #ef4444; }
+.dash-dot.y { background: #eab308; }
+.dash-dot.g { background: #22c55e; }
+.dash-url {
+  flex: 1; text-align: center; font-size: .75rem;
+  color: var(--text-secondary); font-weight: 500;
 }
-.price-btn.primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: white; box-shadow: 0 0 20px var(--accent-glow);
+.dash-body { padding: 28px; }
+.dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.dash-stat {
+  background: rgba(4,5,10,0.5); border: 1px solid var(--glass-border);
+  border-radius: 14px; padding: 20px; text-align: center;
 }
-.price-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 0 35px var(--accent-glow); }
-.price-btn.secondary {
-  background: var(--bg-card-hover);
-  border: 1px solid var(--glass-border); color: var(--text-primary);
+.dash-stat-num { font-size: 1.7rem; font-weight: 900; }
+.dash-stat-label { font-size: .78rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+.dash-brief {
+  background: rgba(212,175,112,0.06); border: 1px solid var(--gold-border);
+  border-radius: 12px; padding: 16px 20px;
+  display: flex; align-items: center; gap: 12px; font-size: .88rem;
 }
-.price-btn.secondary:hover { border-color: rgba(255,255,255,0.2); }
+.dash-brief-icon { font-size: 1.2rem; }
+.dash-brief-text { color: var(--text-secondary); }
+.dash-brief-text strong { color: var(--gold); }
 
-/* COUNTDOWN */
-.countdown-wrap { margin-bottom: 24px; }
-.countdown-label { font-size: 0.8rem; color: var(--orange); font-weight: 600; margin-bottom: 10px; }
-.countdown {
-  display: flex; gap: 10px; justify-content: center;
+/* PAIN */
+.pain-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-left: 3px solid var(--gold);
+  border-radius: 16px; padding: 28px 28px 28px 24px;
+  backdrop-filter: blur(12px);
+  transition: all .3s;
 }
-.count-unit {
-  background: var(--bg-card); border: 1px solid var(--glass-border);
-  border-radius: 10px; padding: 12px 16px; min-width: 60px; text-align: center;
-}
-.count-num { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; color: var(--orange); }
-.count-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.pain-card:hover { border-left-color: var(--cyan); transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+.pain-icon { font-size: 1.6rem; margin-bottom: 12px; }
+.pain-title { font-weight: 700; margin-bottom: 8px; font-size: 1.05rem; }
+.pain-desc { color: var(--text-secondary); font-size: .92rem; line-height: 1.7; }
 
-/* PROGRESS BAR */
-.founders-progress { max-width: 500px; margin: 0 auto 32px; }
-.progress-label {
-  display: flex; justify-content: space-between;
-  font-size: 0.8rem; margin-bottom: 8px;
+/* FEATURES */
+.feature-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 32px;
+  backdrop-filter: blur(16px); transition: all .4s;
+  position: relative; overflow: hidden;
 }
-.progress-label .count { color: var(--accent); font-weight: 700; }
-.progress-label .total { color: var(--text-muted); }
-.progress-bar {
-  height: 8px; background: rgba(255,255,255,0.06);
-  border-radius: 100px; overflow: hidden;
+.feature-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--cyan), transparent);
 }
-.progress-fill {
-  height: 100%; width: 13%;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  border-radius: 100px;
-  box-shadow: 0 0 10px var(--accent-glow);
-  transition: width 1s ease;
+.feature-card:hover { border-color: rgba(56,189,248,0.3); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(56,189,248,0.08); }
+.feature-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; margin-bottom: 20px;
+}
+.feature-title { font-weight: 700; margin-bottom: 10px; font-size: 1.1rem; }
+.feature-desc { color: var(--text-secondary); font-size: .92rem; line-height: 1.7; }
+
+/* MORNING BRIEF */
+.morning-brief {
+  background: linear-gradient(180deg, rgba(4,5,10,1) 0%, rgba(56,189,248,0.04) 30%, rgba(56,189,248,0.06) 50%, rgba(56,189,248,0.04) 70%, rgba(4,5,10,1) 100%);
+  position: relative; overflow: hidden;
+  border-top: 1px solid rgba(56,189,248,0.1);
+  border-bottom: 1px solid rgba(56,189,248,0.1);
+}
+.morning-brief::before {
+  content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.mb-center { text-align: center; max-width: 700px; margin: 0 auto; position: relative; }
+.mb-center h2 { margin-bottom: 16px; }
+.mb-subtitle { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.8; margin-bottom: 48px; }
+.mb-subtitle strong { color: var(--text-primary); }
+
+/* Play button */
+.play-area {
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  margin-bottom: 36px;
+}
+.play-btn {
+  width: 90px; height: 90px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), #0ea5e9);
+  border: none; cursor: pointer; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 40px rgba(56,189,248,0.3);
+  transition: all .3s;
+}
+.play-btn::before {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px solid rgba(56,189,248,0.3);
+  animation: none;
+}
+.play-btn.playing::before { animation: pulse-ring 1.5s ease-out infinite; }
+.play-btn:hover { transform: scale(1.08); box-shadow: 0 0 60px rgba(56,189,248,0.45); }
+.play-btn svg { width: 32px; height: 32px; fill: white; margin-left: 4px; }
+@keyframes pulse-ring { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1.6);opacity:0} }
+
+/* Wave bars */
+.wave-bars { display: flex; gap: 3px; align-items: center; height: 30px; }
+.wave-bar { width: 4px; background: var(--cyan); border-radius: 2px; height: 8px; transition: height .15s; }
+.wave-bars.active .wave-bar { animation: wave .8s ease-in-out infinite alternate; }
+.wave-bars.active .wave-bar:nth-child(1) { animation-delay: 0s; }
+.wave-bars.active .wave-bar:nth-child(2) { animation-delay: .15s; }
+.wave-bars.active .wave-bar:nth-child(3) { animation-delay: .3s; }
+.wave-bars.active .wave-bar:nth-child(4) { animation-delay: .45s; }
+.wave-bars.active .wave-bar:nth-child(5) { animation-delay: .6s; }
+@keyframes wave { 0%{height:8px} 100%{height:28px} }
+
+/* Briefing quote */
+.brief-quote {
+  background: rgba(56,189,248,0.04); border: 1px solid rgba(56,189,248,0.15);
+  border-radius: 16px; padding: 28px 32px; max-width: 580px; margin: 0 auto;
+  font-style: italic; color: var(--text-secondary); line-height: 1.9;
+  font-size: .95rem; position: relative;
+}
+.brief-quote::before { content: '"'; position: absolute; top: 8px; left: 16px; font-size: 3rem; color: rgba(56,189,248,0.2); font-style: normal; line-height: 1; }
+.mb-note {
+  margin-top: 28px; padding: 14px 24px; border-radius: 12px;
+  background: rgba(212,175,112,0.06); border: 1px solid var(--gold-border);
+  font-size: .88rem; color: var(--gold); display: inline-block;
 }
 
-/* GUARANTEE */
+/* TESTIMONIALS */
+.testimonial-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 32px; backdrop-filter: blur(16px);
+  transition: all .35s;
+}
+.testimonial-card:hover { transform: translateY(-4px); border-color: rgba(56,189,248,0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+.t-stars { color: var(--gold); font-size: 1rem; margin-bottom: 16px; letter-spacing: 2px; }
+.t-quote { color: var(--text-secondary); font-size: .95rem; line-height: 1.8; margin-bottom: 20px; font-style: italic; }
+.t-author { display: flex; align-items: center; gap: 12px; }
+.t-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: .85rem; color: var(--bg-deep);
+}
+.t-name { font-weight: 700; font-size: .92rem; }
+.t-role { font-size: .8rem; color: var(--text-secondary); }
+
+/* PRICING */
+.pricing-header { text-align: center; margin-bottom: 48px; }
+.countdown-bar {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: rgba(212,175,112,0.08); border: 1px solid var(--gold-border);
+  border-radius: 50px; padding: 10px 24px; margin-bottom: 20px;
+  font-size: .9rem; color: var(--gold); font-weight: 600;
+}
+.founders-bar { max-width: 340px; margin: 0 auto 8px; }
+.founders-track { height: 8px; background: rgba(56,189,248,0.1); border-radius: 8px; overflow: hidden; }
+.founders-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), #e8c97a); border-radius: 8px; transition: width 1.5s cubic-bezier(.4,0,.2,1); }
+.founders-label { font-size: .82rem; color: var(--text-secondary); margin-top: 8px; text-align: center; }
+
+.pricing-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 24px; padding: 36px 32px; text-align: center;
+  backdrop-filter: blur(16px); transition: all .4s; position: relative;
+}
+.pricing-card:hover { transform: translateY(-4px); }
+.pricing-card.featured {
+  border-color: var(--gold); background: rgba(212,175,112,0.06);
+  box-shadow: 0 0 60px rgba(212,175,112,0.12);
+  transform: scale(1.04);
+}
+.pricing-card.featured:hover { transform: scale(1.04) translateY(-4px); }
+.pricing-badge {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--gold), #e8c97a);
+  color: var(--bg-deep); padding: 5px 20px; border-radius: 50px;
+  font-size: .78rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.pricing-name { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; }
+.pricing-price { font-size: 3rem; font-weight: 900; margin-bottom: 4px; }
+.pricing-period { color: var(--text-secondary); font-size: .88rem; margin-bottom: 8px; }
+.pricing-save { color: var(--emerald); font-weight: 700; font-size: .88rem; margin-bottom: 20px; }
+.pricing-features { list-style: none; text-align: left; margin-bottom: 28px; }
+.pricing-features li { padding: 8px 0; font-size: .9rem; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; }
+.pricing-features li::before { content: '✓'; color: var(--emerald); font-weight: 700; }
+
 .guarantee-card {
-  background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2);
-  border-radius: 16px; padding: 28px; text-align: center; margin-top: 32px;
-  display: flex; align-items: center; gap: 20px;
+  max-width: 520px; margin: 40px auto 0; text-align: center;
+  background: rgba(52,211,153,0.04); border: 1px solid rgba(52,211,153,0.15);
+  border-radius: 16px; padding: 24px 32px;
 }
-.guarantee-icon { font-size: 2.5rem; flex-shrink: 0; }
-.guarantee-text h3 { font-size: 1rem; font-weight: 700; color: var(--green); margin-bottom: 6px; }
-.guarantee-text p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
+.guarantee-card .icon { font-size: 2rem; margin-bottom: 8px; }
+.guarantee-card h3 { color: var(--emerald); margin-bottom: 6px; }
+.guarantee-card p { color: var(--text-secondary); font-size: .9rem; }
 
-/* ===== FAQ ===== */
-.faq-list { max-width: 700px; margin: 0 auto; }
+/* FAQ */
 .faq-item {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  border-radius: 14px; margin-bottom: 10px;
-  overflow: hidden; cursor: pointer;
-  transition: all 0.3s;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 16px; margin-bottom: 12px; overflow: hidden;
+  backdrop-filter: blur(12px); transition: border-color .3s;
 }
-.faq-item:hover { border-color: rgba(255,255,255,0.15); }
-.faq-q {
-  padding: 18px 22px;
-  font-weight: 600; font-size: 0.95rem;
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+.faq-item:hover { border-color: rgba(56,189,248,0.2); }
+.faq-item summary {
+  padding: 22px 28px; cursor: pointer; font-weight: 700; font-size: 1rem;
+  list-style: none; display: flex; align-items: center; justify-content: space-between;
+  color: var(--text-primary); transition: color .2s;
+  user-select: none;
 }
-.faq-arrow { color: var(--text-muted); font-size: 0.8rem; transition: transform 0.3s; }
-.faq-item.open .faq-arrow { transform: rotate(180deg); }
-.faq-a {
-  display: none; padding: 0 22px 18px;
-  font-size: 0.875rem; color: var(--text-secondary); line-height: 1.7;
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+'; font-size: 1.4rem; color: var(--cyan); font-weight: 300;
+  transition: transform .3s;
 }
-.faq-item.open .faq-a { display: block; }
+.faq-item[open] summary::after { content: '−'; }
+.faq-item[open] summary { color: var(--cyan); }
+.faq-answer { padding: 0 28px 22px; color: var(--text-secondary); font-size: .94rem; line-height: 1.8; }
 
-/* ===== FINAL CTA ===== */
-#final-cta {
+/* FINAL CTA */
+.final-cta {
   text-align: center;
-  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06));
-  border-top: 1px solid rgba(99,102,241,0.15);
+  background: linear-gradient(180deg, var(--bg-deep) 0%, rgba(212,175,112,0.04) 50%, var(--bg-deep) 100%);
 }
+.final-cta h2 { margin-bottom: 28px; }
 
-/* ===== FOOTER ===== */
-footer {
-  background: rgba(255,255,255,0.02);
-  border-top: 1px solid var(--glass-border);
-  padding: 32px 20px; text-align: center;
-  font-size: 0.8rem; color: var(--text-muted);
-  position: relative; z-index: 1;
+/* FOOTER */
+.footer {
+  border-top: 1px solid var(--glass-border); padding: 32px 0;
+  text-align: center; color: var(--text-secondary); font-size: .85rem;
 }
+.footer-links { display: flex; justify-content: center; gap: 28px; margin-bottom: 16px; flex-wrap: wrap; }
+.footer-links a { color: var(--text-secondary); font-size: .85rem; }
+.footer-links a:hover { color: var(--cyan); }
 
-/* ===== DIVIDER ===== */
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
-  margin: 0;
+/* About (AEO) */
+.about-section { padding: 40px 0; }
+.about-section p { color: var(--text-secondary); font-size: .88rem; line-height: 1.8; max-width: 800px; margin: 0 auto; opacity: 0.7; }
+
+/* Section headers */
+.section-header { text-align: center; margin-bottom: 56px; }
+.section-header .label { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--cyan); margin-bottom: 14px; }
+.section-header h2 { margin-bottom: 16px; }
+.section-header p { color: var(--text-secondary); max-width: 560px; margin: 0 auto; font-size: 1.05rem; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .mobile-toggle { display: block; }
+  .nav-links.open {
+    display: flex; flex-direction: column; position: absolute;
+    top: 70px; left: 0; right: 0;
+    background: rgba(4,5,10,0.97); backdrop-filter: blur(20px);
+    padding: 20px 24px; gap: 16px;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .dash-stats { grid-template-columns: 1fr; }
+  section { padding: 64px 0; }
+  .hero { padding-top: 110px; }
+  .pricing-card.featured { transform: none; }
+  .pricing-card.featured:hover { transform: translateY(-4px); }
+  .cta-group { flex-direction: column; align-items: center; }
+  .btn { width: 100%; max-width: 340px; justify-content: center; }
 }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 600px) {
-  section { padding: 60px 0; }
-  .preview-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .hero-title { font-size: 2rem; letter-spacing: -1px; }
-  .price-card.featured { transform: none; }
-  .guarantee-card { flex-direction: column; text-align: center; }
-  .countdown { gap: 6px; }
-  .count-unit { min-width: 50px; padding: 10px 12px; }
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
 <body>
+<div class="stars" aria-hidden="true"></div>
 
 <!-- NAV -->
-<nav>
-  <div class="nav-inner">
-    <div class="nav-logo">Follow<span>Boss</span></div>
-    <a href="#pricing" class="nav-cta">🚀 Commencer gratuitement</a>
+<nav class="nav" aria-label="Navigation principale">
+<div class="nav-inner">
+  <a href="#" class="logo" aria-label="FollowBoss Accueil">Follow<strong>Boss</strong></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#features" data-i18n="nav_features">Fonctionnalités</a></li>
+    <li><a href="#morning-brief" data-i18n="nav_brief">Briefing Vocal</a></li>
+    <li><a href="#pricing" data-i18n="nav_pricing">Tarifs</a></li>
+    <li><a href="#faq" data-i18n="nav_faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-toggle" role="radiogroup" aria-label="Langue">
+      <button id="langFr" class="active" onclick="setLang('fr')" role="radio" aria-checked="true">FR</button>
+      <button id="langEn" onclick="setLang('en')" role="radio" aria-checked="false">EN</button>
+    </div>
+    <a href="#pricing" class="btn btn-gold btn-sm" data-i18n="nav_cta">Essai gratuit</a>
+    <button class="mobile-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
   </div>
+</div>
 </nav>
 
+<main>
+
 <!-- HERO -->
-<section id="hero">
-  <div class="container">
-    <div class="badge">⚡ Outil #1 pour freelances &amp; PME francophones</div>
-    <h1 class="hero-title">
-      Arrête de perdre des milliers $<br/>
-      en <span class="grad">relances oubliées</span>
-    </h1>
-    <p class="hero-sub">
-      FollowBoss gère tes relances clients automatiquement et te donne un <strong>briefing vocal chaque matin</strong>. Ne perds plus jamais un devis, une facture ou un prospect.
-    </p>
-    <div class="hero-cta-group">
-      <a href="#pricing" class="btn-primary">✨ Essai gratuit 30 jours</a>
-      <a href="#features" class="btn-secondary">Voir comment ça marche →</a>
-    </div>
-    <p class="hero-note"><span>✓</span> Sans carte de crédit &nbsp;·&nbsp; <span>✓</span> Annule à tout moment &nbsp;·&nbsp; <span>✓</span> Configuration en 2 min</p>
+<section class="hero" id="hero" aria-label="Présentation FollowBoss" role="region">
+<div class="container">
+  <div class="badge" data-i18n="hero_badge">⚡ Outil #1 pour freelances & PME francophones</div>
+  <h1 data-i18n-html="hero_title">Arrête de perdre des milliers $<br/>en <span class="gradient-text">relances oubliées</span></h1>
+  <p class="subtitle" data-i18n-html="hero_subtitle">FollowBoss gère tes relances clients automatiquement et te donne un <strong>briefing vocal chaque matin</strong>. Ne perds plus jamais un devis, une facture ou un prospect.</p>
+  <div class="cta-group">
+    <a href="#pricing" class="btn btn-gold" data-i18n="hero_cta1">Essai gratuit 30 jours</a>
+    <a href="#morning-brief" class="btn btn-glass" data-i18n="hero_cta2">Voir comment ça marche →</a>
+  </div>
+  <p class="trust-note" data-i18n-html="hero_trust"><span class="check">✓</span> Sans carte de crédit · <span class="check">✓</span> Annule à tout moment · <span class="check">✓</span> Configuration en 2 min</p>
 
-    <!-- PREVIEW MOCKUP -->
-    <div class="hero-preview">
-      <div class="preview-bar">
-        <div class="preview-dot red"></div>
-        <div class="preview-dot yellow"></div>
-        <div class="preview-dot green"></div>
+  <!-- Dashboard Mockup -->
+  <div class="dashboard-mock" role="img" aria-label="Aperçu du tableau de bord FollowBoss">
+    <div class="dash-topbar">
+      <span class="dash-dot r"></span><span class="dash-dot y"></span><span class="dash-dot g"></span>
+      <span class="dash-url">app.followboss.ca/dashboard</span>
+    </div>
+    <div class="dash-body">
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-num text-cyan">12</div>
+          <div class="dash-stat-label" data-i18n="dash_active">Relances actives</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num text-gold">$4,800</div>
+          <div class="dash-stat-label" data-i18n="dash_pending">En cours</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num text-emerald">3</div>
+          <div class="dash-stat-label" data-i18n="dash_priorities">Priorités</div>
+        </div>
       </div>
-      <div class="preview-grid">
-        <div class="preview-stat">
-          <div class="preview-stat-num accent">12</div>
-          <div class="preview-stat-label">Relances actives</div>
-        </div>
-        <div class="preview-stat">
-          <div class="preview-stat-num green">$4,800</div>
-          <div class="preview-stat-label">En cours</div>
-        </div>
-        <div class="preview-stat">
-          <div class="preview-stat-num orange">3</div>
-          <div class="preview-stat-label">Priorités aujourd'hui</div>
-        </div>
-      </div>
-      <div class="preview-brief">
-        <div class="preview-brief-icon">🎙️</div>
-        <div class="preview-brief-text">
-          <strong>Briefing du matin</strong> — "Bonjour! Aujourd'hui tu as 3 priorités. Ton devis de $1,200 chez Martin &amp; Associés attend une réponse depuis 5 jours. Bonne journée!"
-        </div>
+      <div class="dash-brief">
+        <span class="dash-brief-icon">🎙️</span>
+        <span class="dash-brief-text" data-i18n-html="dash_brief_text"><strong>Briefing du matin:</strong> 3 priorités, $2,500 en attente urgente</span>
       </div>
     </div>
   </div>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- PAIN SECTION -->
-<section id="pain">
-  <div class="container">
-    <div class="section-label">😤 Le problème</div>
-    <h2 class="section-title">Tu perds de l'argent chaque semaine — sans même t'en rendre compte</h2>
-    <p class="section-sub">En tant que freelance ou entrepreneur, les relances clients prennent du temps, de l'énergie, et tombent souvent dans l'oubli. Résultat : des milliers de dollars qui disparaissent.</p>
-    <div class="pain-grid">
-      <div class="pain-card">
-        <div class="pain-icon">📋</div>
-        <div class="pain-title">Des devis sans réponse</div>
-        <div class="pain-text">Tu envoies un devis, tu attends… et tu oublies de relancer. Le client signe avec quelqu'un d'autre.</div>
-      </div>
-      <div class="pain-card">
-        <div class="pain-icon">💸</div>
-        <div class="pain-title">Des factures impayées</div>
-        <div class="pain-text">Relancer un client pour de l'argent, c'est inconfortable. Alors tu repousses — et parfois tu ne te fais jamais payer.</div>
-      </div>
-      <div class="pain-card">
-        <div class="pain-icon">🤯</div>
-        <div class="pain-title">Trop de choses à gérer</div>
-        <div class="pain-text">Clients, prospects, factures, projets… tu jonglais avec tout ça dans ta tête ou sur des post-its. C'est épuisant.</div>
-      </div>
-      <div class="pain-card">
-        <div class="pain-icon">⏰</div>
-        <div class="pain-title">Pas le temps pour les suivis</div>
-        <div class="pain-text">Entre les projets et les réunions, les relances passent toujours en dernier. Jusqu'au jour où c'est trop tard.</div>
-      </div>
+<!-- PAIN -->
+<section id="pain" aria-label="Le problème" role="region">
+<div class="container">
+  <div class="section-header">
+    <div class="label" data-i18n="pain_label">Le problème</div>
+    <h2 data-i18n="pain_title">Tu perds de l'argent chaque semaine — sans même t'en rendre compte</h2>
+  </div>
+  <div class="grid-2">
+    <div class="pain-card">
+      <div class="pain-icon">📄</div>
+      <div class="pain-title" data-i18n="pain1_title">Devis sans réponse</div>
+      <p class="pain-desc" data-i18n="pain1_desc">Tu envoies des devis mais tu oublies de relancer. Des milliers de dollars dorment dans ta boîte d'envoi.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">💸</div>
+      <div class="pain-title" data-i18n="pain2_title">Factures impayées</div>
+      <p class="pain-desc" data-i18n="pain2_desc">Des clients te doivent de l'argent. Sans système de suivi, ces factures passent entre les mailles du filet.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">🤯</div>
+      <div class="pain-title" data-i18n="pain3_title">Trop de choses à gérer</div>
+      <p class="pain-desc" data-i18n="pain3_desc">Entre les courriels, les appels, les projets… les relances finissent toujours en bas de ta liste de priorités.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">⏰</div>
+      <div class="pain-title" data-i18n="pain4_title">Pas le temps pour les suivis</div>
+      <p class="pain-desc" data-i18n="pain4_desc">Tu sais que tu devrais relancer, mais tu n'as jamais le temps. Résultat : des opportunités perdues chaque semaine.</p>
     </div>
   </div>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- SOLUTION -->
-<section id="features">
-  <div class="container">
-    <div class="section-label">✅ La solution</div>
-    <h2 class="section-title">FollowBoss gère tout ça à ta place</h2>
-    <p class="section-sub">Un tableau de bord ultra-simple qui centralise toutes tes relances et te dit exactement quoi faire et quand.</p>
-
-    <div class="solution-grid">
-      <div class="solution-card">
-        <div class="solution-icon">🎯</div>
-        <div class="solution-title">Dashboard intelligent</div>
-        <div class="solution-text">Vois d'un coup d'œil tes priorités du jour, les montants en attente et l'activité récente. Zéro perte de temps.</div>
-      </div>
-      <div class="solution-card">
-        <div class="solution-icon">⚡</div>
-        <div class="solution-title">Actions en 1 clic</div>
-        <div class="solution-text">Marque une relance comme positive, négative ou sans réponse. Tout se met à jour instantanément dans tes rapports.</div>
-      </div>
-      <div class="solution-card">
-        <div class="solution-icon">📊</div>
-        <div class="solution-title">Rapports quotidiens</div>
-        <div class="solution-text">"Aujourd'hui: 5 relances, 2 positives, 1 négative, 2 sans réponse." Tu sais exactement où tu en es chaque jour.</div>
-      </div>
-      <div class="solution-card">
-        <div class="solution-icon">🔔</div>
-        <div class="solution-title">Priorités automatiques</div>
-        <div class="solution-text">FollowBoss identifie les dossiers urgents selon les délais et les montants. Tu ne rates plus rien d'important.</div>
-      </div>
-    </div>
-
-    <!-- VOCAL BRIEF HIGHLIGHT -->
-    <div class="brief-card" style="margin-top:40px;">
-      <div class="brief-mic">🎙️</div>
-      <h2 class="section-title" style="margin-bottom:12px;">Ton assistant vocal du matin</h2>
-      <p class="section-sub" style="max-width:500px;margin:0 auto;">
-        Chaque matin, FollowBoss te lit ton briefing du jour à voix haute — en français. Comme si tu avais un assistant personnel.
-      </p>
-      <div class="brief-quote">
-        "Bonjour! Tu as 3 priorités aujourd'hui. Le devis de $2,500 chez Dupont Construction attend une réponse depuis 7 jours — c'est urgent. Hier, 2 relances positives pour un total de $1,800 récupérés. Excellente journée à toi!"
-      </div>
-    </div>
+<!-- FEATURES -->
+<section id="features" aria-label="Fonctionnalités" role="region">
+<div class="container">
+  <div class="section-header">
+    <div class="label" data-i18n="features_label">La solution</div>
+    <h2 data-i18n="features_title">FollowBoss gère tout ça à ta place</h2>
   </div>
+  <div class="grid-2">
+    <article class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3 class="feature-title" data-i18n="feat1_title">Dashboard intelligent</h3>
+      <p class="feature-desc" data-i18n="feat1_desc">Visualise en un clin d'œil tous tes devis, factures et prospects en attente. FollowBoss organise tout pour toi et te montre ce qui est urgent.</p>
+    </article>
+    <article class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3 class="feature-title" data-i18n="feat2_title">Actions en 1 clic</h3>
+      <p class="feature-desc" data-i18n="feat2_desc">Relance un client, marque une facture comme payée ou envoie un rappel — tout se fait en un seul clic directement depuis ton tableau de bord.</p>
+    </article>
+    <article class="feature-card">
+      <div class="feature-icon">📈</div>
+      <h3 class="feature-title" data-i18n="feat3_title">Rapports quotidiens</h3>
+      <p class="feature-desc" data-i18n="feat3_desc">Chaque jour, tu reçois un résumé clair de ta situation : combien tu as récupéré, ce qui est en retard, et les actions à prendre.</p>
+    </article>
+    <article class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3 class="feature-title" data-i18n="feat4_title">Priorités automatiques</h3>
+      <p class="feature-desc" data-i18n="feat4_desc">L'algorithme FollowBoss classe tes relances par urgence et potentiel. Tu sais toujours exactement quoi faire en premier.</p>
+    </article>
+  </div>
+</div>
 </section>
 
-<div class="divider"></div>
+<!-- MORNING BRIEF ⭐ -->
+<section class="morning-brief" id="morning-brief" aria-label="Briefing vocal du matin" role="region">
+<div class="container">
+  <div class="mb-center">
+    <h2 data-i18n="mb_title">🎙️ Ton assistant vocal du matin</h2>
+    <p class="mb-subtitle" data-i18n-html="mb_subtitle">Chaque matin, FollowBoss te lit ton briefing du jour à voix haute — en français. Comme si tu avais un <strong>assistant personnel</strong>.</p>
+
+    <div class="play-area">
+      <button class="play-btn" id="playBtn" onclick="playBrief()" aria-label="Écouter le briefing vocal">
+        <svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
+      </button>
+      <div class="wave-bars" id="waveBars" aria-hidden="true">
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      </div>
+      <span class="text-secondary" style="font-size:.85rem" data-i18n="mb_play_label">Clique pour écouter un exemple</span>
+    </div>
+
+    <div class="brief-quote" data-i18n="mb_quote">Bonjour! Tu as 3 priorités aujourd'hui. Le devis de 2 500$ chez Dupont Construction attend une réponse depuis 7 jours. C'est urgent. Hier, 2 relances positives pour un total de 1 800$ récupérés. Excellente journée à toi!</div>
+
+    <div class="mb-note" data-i18n="mb_note">💡 Le briefing s'adapte automatiquement à tes données réelles chaque jour</div>
+  </div>
+</div>
+</section>
 
 <!-- TESTIMONIALS -->
-<section id="testimonials">
-  <div class="container">
-    <div class="section-label" style="text-align:center;">💬 Ils adorent FollowBoss</div>
-    <h2 class="section-title" style="text-align:center;">Rejoint des centaines d'entrepreneurs qui récupèrent leurs revenus</h2>
-    <div class="testimonials-grid" style="margin-top:40px;">
-      <div class="testimonial-card">
-        <div class="stars">★★★★★</div>
-        <p class="testimonial-text">"J'ai récupéré 3 devis oubliés dès la première semaine. L'outil se rembourse en quelques jours. Incroyable!"</p>
-        <div class="testimonial-author">
-          <div class="author-avatar">MC</div>
-          <div class="author-info">
-            <div class="name">Marie-Claude B.</div>
-            <div class="role">Designer graphique, Montréal</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="stars">★★★★★</div>
-        <p class="testimonial-text">"Le briefing vocal le matin c'est un game changer. Je démarre mes journées en sachant exactement quoi faire en priorité."</p>
-        <div class="testimonial-author">
-          <div class="author-avatar">JP</div>
-          <div class="author-info">
-            <div class="name">Jean-Philippe R.</div>
-            <div class="role">Consultant RH, Québec</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="stars">★★★★★</div>
-        <p class="testimonial-text">"Fini les factures impayées oubliées dans mes emails. Tout est centralisé, je relance en 1 clic. Simple et efficace!"</p>
-        <div class="testimonial-author">
-          <div class="author-avatar">SL</div>
-          <div class="author-info">
-            <div class="name">Sophie L.</div>
-            <div class="role">Comptable indépendante, Lyon</div>
-          </div>
-        </div>
-      </div>
-    </div>
+<section id="testimonials" aria-label="Témoignages clients" role="region">
+<div class="container">
+  <div class="section-header">
+    <div class="label" data-i18n="testimonials_label">Témoignages</div>
+    <h2 data-i18n="testimonials_title">Ils ont adopté FollowBoss</h2>
   </div>
+  <div class="grid-3">
+    <article class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-quote" data-i18n="t1_quote">"Depuis que j'utilise FollowBoss, j'ai récupéré plus de 3 000$ en factures que j'avais oubliées. Le briefing du matin, c'est devenu mon rituel café ☕"</p>
+      <div class="t-author">
+        <div class="t-avatar">MC</div>
+        <div>
+          <div class="t-name">Marie-Claude B.</div>
+          <div class="t-role" data-i18n="t1_role">Designer graphique, Montréal</div>
+        </div>
+      </div>
+    </article>
+    <article class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-quote" data-i18n="t2_quote">"Avant FollowBoss, je perdais au moins un gros contrat par mois à cause de relances manquées. Maintenant, tout est automatique. Je recommande à 100%."</p>
+      <div class="t-author">
+        <div class="t-avatar">JP</div>
+        <div>
+          <div class="t-name">Jean-Philippe R.</div>
+          <div class="t-role" data-i18n="t2_role">Consultant RH, Québec</div>
+        </div>
+      </div>
+    </article>
+    <article class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-quote" data-i18n="t3_quote">"L'interface est magnifique et le briefing vocal est génial. J'ai l'impression d'avoir une assistante personnelle pour une fraction du prix."</p>
+      <div class="t-author">
+        <div class="t-avatar">SL</div>
+        <div>
+          <div class="t-name">Sophie L.</div>
+          <div class="t-role" data-i18n="t3_role">Comptable indépendante, Lyon</div>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>
 </section>
-
-<div class="divider"></div>
 
 <!-- PRICING -->
-<section id="pricing">
-  <div class="container">
-    <div class="section-label">⚡ Tarification</div>
-    <h2 class="section-title">Investis moins que le prix d'un café par semaine</h2>
-    <p class="section-sub">1 seule facture récupérée rembourse des années de FollowBoss. C'est l'investissement le plus rentable que tu peux faire.</p>
-
-    <!-- COUNTDOWN -->
-    <div class="countdown-wrap">
-      <div class="countdown-label">⏰ Offre Fondateurs — expire dans :</div>
-      <div class="countdown">
-        <div class="count-unit">
-          <div class="count-num" id="days">--</div>
-          <div class="count-lbl">Jours</div>
-        </div>
-        <div class="count-unit">
-          <div class="count-num" id="hours">--</div>
-          <div class="count-lbl">Heures</div>
-        </div>
-        <div class="count-unit">
-          <div class="count-num" id="minutes">--</div>
-          <div class="count-lbl">Min</div>
-        </div>
-        <div class="count-unit">
-          <div class="count-num" id="seconds">--</div>
-          <div class="count-lbl">Sec</div>
-        </div>
-      </div>
+<section id="pricing" aria-label="Tarifs" role="region">
+<div class="container">
+  <div class="pricing-header">
+    <div class="countdown-bar">
+      <span>🔥</span>
+      <span data-i18n="pricing_countdown_prefix">Offre Fondateurs expire dans</span>
+      <strong id="countdown">--j --h --m</strong>
     </div>
-
-    <!-- FOUNDERS PROGRESS -->
-    <div class="founders-progress">
-      <div class="progress-label">
-        <span class="count">🔥 13 fondateurs ont rejoint</span>
-        <span class="total">100 places max</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="founders-bar">
+      <div class="founders-track"><div class="founders-fill" id="foundersFill"></div></div>
+      <div class="founders-label" data-i18n-html="founders_label"><strong>13</strong>/100 <span data-i18n="founders_spots">places Fondateurs prises</span></div>
     </div>
-
-    <div class="pricing-grid">
-      <!-- MONTHLY -->
-      <div class="price-card monthly">
-        <div class="price-name">Mensuel</div>
-        <div class="price-amount"><span class="currency">$</span>19</div>
-        <div class="price-period">/ mois</div>
-        <div class="price-save">&nbsp;</div>
-        <ul class="price-features">
-          <li><span class="check">✓</span> Relances illimitées</li>
-          <li><span class="check">✓</span> Dashboard complet</li>
-          <li><span class="check">✓</span> Rapports quotidiens</li>
-          <li><span class="check">✓</span> Briefing vocal matin</li>
-          <li><span class="check">✓</span> Annule à tout moment</li>
-        </ul>
-        <button class="price-btn secondary" onclick="alert('Lancement bientôt! Inscris-toi à la liste d\'attente.')">Commencer →</button>
-      </div>
-
-      <!-- FOUNDERS (FEATURED) -->
-      <div class="price-card featured">
-        <div class="price-tag">⚡ Fondateurs</div>
-        <div class="price-name">Fondateurs — Limité</div>
-        <div class="price-amount"><span class="currency">$</span>99</div>
-        <div class="price-period">/ an · à vie</div>
-        <div class="price-save">🎉 Save $129 vs mensuel</div>
-        <ul class="price-features">
-          <li><span class="check">✓</span> Tout du plan mensuel</li>
-          <li><span class="check">✓</span> Prix verrouillé à vie</li>
-          <li><span class="check">✓</span> Accès prioritaire nouvelles fonctions</li>
-          <li><span class="check">✓</span> Badge "Fondateur" exclusif</li>
-          <li><span class="check">✓</span> Support prioritaire direct</li>
-        </ul>
-        <button class="price-btn primary" onclick="alert('Lancement bientôt! Inscris-toi à la liste d\'attente.')">🚀 Je veux ce prix →</button>
-      </div>
-
-      <!-- ANNUAL -->
-      <div class="price-card annual">
-        <div class="price-name">Annuel</div>
-        <div class="price-amount"><span class="currency">$</span>149</div>
-        <div class="price-period">/ an</div>
-        <div class="price-save">Économise 35% vs mensuel</div>
-        <ul class="price-features">
-          <li><span class="check">✓</span> Tout du plan mensuel</li>
-          <li><span class="check">✓</span> 2 mois offerts</li>
-          <li><span class="check">✓</span> Facturation annuelle</li>
-          <li><span class="check">✓</span> Support email prioritaire</li>
-          <li style="color: var(--text-muted)"><span>–</span> Prix non garanti les années suivantes</li>
-        </ul>
-        <button class="price-btn secondary" onclick="alert('Lancement bientôt! Inscris-toi à la liste d\'attente.')">Commencer →</button>
-      </div>
-    </div>
-
-    <!-- GUARANTEE -->
-    <div class="guarantee-card">
-      <div class="guarantee-icon">🛡️</div>
-      <div class="guarantee-text">
-        <h3>Garantie satisfait ou remboursé 30 jours</h3>
-        <p>Si FollowBoss ne t'aide pas à récupérer au moins le double de ton investissement dans les 30 premiers jours, on te rembourse intégralement. Sans questions, sans délai.</p>
-      </div>
+    <div class="section-header" style="margin-bottom:0">
+      <h2 data-i18n="pricing_title">Un prix simple. Un impact immédiat.</h2>
     </div>
   </div>
+  <div class="grid-3">
+    <!-- Mensuel -->
+    <article class="pricing-card">
+      <div class="pricing-name" data-i18n="plan1_name">Mensuel</div>
+      <div class="pricing-price">$19</div>
+      <div class="pricing-period" data-i18n="plan1_period">/mois</div>
+      <div class="pricing-save">&nbsp;</div>
+      <ul class="pricing-features">
+        <li data-i18n="plan_feat1">Toutes les fonctionnalités</li>
+        <li data-i18n="plan_feat2">Briefing vocal quotidien</li>
+        <li data-i18n="plan_feat3">Relances illimitées</li>
+        <li data-i18n="plan_feat4">Support par courriel</li>
+      </ul>
+      <button class="btn btn-glass" style="width:100%;justify-content:center" onclick="alert(currentLang==='fr'?'Lancement bientôt! Inscris-toi à la liste d\'attente.':'Launching soon! Join the waitlist.')" data-i18n="plan_cta">Commencer</button>
+    </article>
+    <!-- Fondateurs -->
+    <article class="pricing-card featured">
+      <div class="pricing-badge" data-i18n="plan2_badge">⭐ Fondateurs</div>
+      <div class="pricing-name" data-i18n="plan2_name">Fondateurs — À vie</div>
+      <div class="pricing-price text-gold">$99</div>
+      <div class="pricing-period" data-i18n="plan2_period">/an · à vie</div>
+      <div class="pricing-save" data-i18n="plan2_save">Économise $129/an</div>
+      <ul class="pricing-features">
+        <li data-i18n="plan_feat1">Toutes les fonctionnalités</li>
+        <li data-i18n="plan_feat2">Briefing vocal quotidien</li>
+        <li data-i18n="plan_feat3">Relances illimitées</li>
+        <li data-i18n="plan_feat5">Support prioritaire</li>
+        <li data-i18n="plan_feat6">Tarif garanti à vie</li>
+      </ul>
+      <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="alert(currentLang==='fr'?'Lancement bientôt! Inscris-toi à la liste d\'attente.':'Launching soon! Join the waitlist.')" data-i18n="plan_cta">Commencer</button>
+    </article>
+    <!-- Annuel -->
+    <article class="pricing-card">
+      <div class="pricing-name" data-i18n="plan3_name">Annuel</div>
+      <div class="pricing-price">$149</div>
+      <div class="pricing-period" data-i18n="plan3_period">/an</div>
+      <div class="pricing-save" data-i18n="plan3_save">Économise $79/an</div>
+      <ul class="pricing-features">
+        <li data-i18n="plan_feat1">Toutes les fonctionnalités</li>
+        <li data-i18n="plan_feat2">Briefing vocal quotidien</li>
+        <li data-i18n="plan_feat3">Relances illimitées</li>
+        <li data-i18n="plan_feat4">Support par courriel</li>
+      </ul>
+      <button class="btn btn-glass" style="width:100%;justify-content:center" onclick="alert(currentLang==='fr'?'Lancement bientôt! Inscris-toi à la liste d\'attente.':'Launching soon! Join the waitlist.')" data-i18n="plan_cta">Commencer</button>
+    </article>
+  </div>
+  <div class="guarantee-card">
+    <div class="icon">🛡️</div>
+    <h3 data-i18n="guarantee_title">Garantie 30 jours — satisfait ou remboursé</h3>
+    <p data-i18n="guarantee_desc">Essaie FollowBoss sans risque. Si tu n'es pas convaincu dans les 30 premiers jours, on te rembourse intégralement, sans question.</p>
+  </div>
+</div>
 </section>
-
-<div class="divider"></div>
 
 <!-- FAQ -->
-<section id="faq">
-  <div class="container">
-    <div class="section-label" style="text-align:center;">❓ Questions fréquentes</div>
-    <h2 class="section-title" style="text-align:center; margin-bottom:40px;">Tout ce que tu veux savoir</h2>
-    <div class="faq-list">
-      <div class="faq-item">
-        <div class="faq-q">C'est quoi exactement FollowBoss? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">FollowBoss est un outil de gestion des relances clients conçu pour les freelances et PME francophones. Il centralise tes devis, factures et prospects, te rappelle quoi relancer et te donne un briefing vocal chaque matin.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Est-ce que c'est difficile à utiliser? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">Pas du tout! L'interface est ultra-intuitive. Tu peux ajouter une relance en moins de 30 secondes. Pas besoin de formation, pas de courbe d'apprentissage. Tu utilises, c'est tout.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">C'est quoi l'"offre Fondateurs"? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">Les 100 premiers clients obtiennent un accès à vie pour seulement $99/an — ce prix est garanti à vie. Après les 100 places, le prix passe à $149/an. C'est notre façon de récompenser ceux qui nous font confiance dès le début.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Est-ce que je peux annuler à tout moment? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">Oui, absolument. Pour les plans mensuels et annuels, tu peux annuler à tout moment depuis ton compte. L'offre Fondateurs est un accès à vie — une fois que tu l'as, tu l'as pour toujours.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Mes données sont-elles sécurisées? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">Oui. Tes données sont chiffrées et ne sont jamais partagées avec des tiers. Tu as le contrôle total sur tes informations à tout moment.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Quand est-ce que FollowBoss est disponible? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">FollowBoss est en phase de lancement. En t'inscrivant maintenant, tu assures ton prix Fondateurs et tu seras parmi les premiers à accéder à la plateforme complète.</div>
-      </div>
-    </div>
+<section id="faq" aria-label="Questions fréquentes" role="region">
+<div class="container">
+  <div class="section-header">
+    <h2 data-i18n="faq_title">Questions fréquentes</h2>
   </div>
+  <div style="max-width:740px;margin:0 auto">
+    <details class="faq-item">
+      <summary data-i18n="faq1_q">Est-ce que FollowBoss fonctionne avec mes outils actuels?</summary>
+      <div class="faq-answer" data-i18n="faq1_a">Oui! FollowBoss s'intègre facilement avec vos outils existants. Importez vos données par CSV ou connectez-vous directement. Aucune configuration compliquée n'est nécessaire.</div>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq2_q">Comment fonctionne le briefing vocal du matin?</summary>
+      <div class="faq-answer" data-i18n="faq2_a">Chaque matin, FollowBoss analyse vos données — devis en attente, factures impayées, prospects à relancer — et génère un résumé audio personnalisé en français. C'est comme avoir un assistant personnel qui vous prépare pour la journée.</div>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq3_q">Puis-je annuler à tout moment?</summary>
+      <div class="faq-answer" data-i18n="faq3_a">Absolument. Aucun engagement, aucune pénalité. Vous pouvez annuler votre abonnement en un clic depuis votre tableau de bord à tout moment.</div>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq4_q">Est-ce que mes données sont en sécurité?</summary>
+      <div class="faq-answer" data-i18n="faq4_a">Vos données sont chiffrées (AES-256) au repos et en transit. Nous utilisons des serveurs sécurisés au Canada et ne partageons jamais vos informations avec des tiers.</div>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq5_q">Combien de temps prend la configuration?</summary>
+      <div class="faq-answer" data-i18n="faq5_a">Moins de 2 minutes. Créez votre compte, importez vos contacts ou commencez de zéro, et FollowBoss commence immédiatement à organiser vos relances.</div>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq6_q">Le tarif Fondateurs est-il vraiment à vie?</summary>
+      <div class="faq-answer" data-i18n="faq6_a">Oui! Les 100 premiers inscrits bénéficient du tarif de $99/an pour toujours, même quand le prix augmentera. C'est notre façon de remercier ceux qui nous font confiance dès le début.</div>
+    </details>
+  </div>
+</div>
 </section>
-
-<div class="divider"></div>
 
 <!-- FINAL CTA -->
-<section id="final-cta">
-  <div class="container" style="text-align:center;">
-    <div class="badge">🚀 Rejoins les Fondateurs</div>
-    <h2 class="section-title">Prêt à ne plus jamais perdre<br/>une relance importante?</h2>
-    <p class="section-sub" style="max-width:480px;margin:0 auto 32px;">30 jours gratuits. Sans carte de crédit. L'offre Fondateurs à $99/an disparaît dès que les 100 places sont prises.</p>
-    <a href="#pricing" class="btn-primary" style="font-size:1.1rem; padding:18px 40px;">✨ Commencer gratuitement</a>
-    <p class="hero-note" style="margin-top:16px;"><span>✓</span> Garantie 30 jours &nbsp;·&nbsp; <span>✓</span> 100% en français &nbsp;·&nbsp; <span>✓</span> Prix Fondateurs verrouillé à vie</p>
-  </div>
+<section class="final-cta" aria-label="Appel à l'action" role="region">
+<div class="container" style="max-width:640px">
+  <div class="badge badge-gold" data-i18n="final_badge">🚀 Rejoins les Fondateurs</div>
+  <h2 style="margin-top:24px" data-i18n="final_title">Prêt à ne plus jamais perdre un client?</h2>
+  <p class="text-secondary" style="margin-bottom:32px;font-size:1.05rem" data-i18n="final_desc">Rejoins les freelances et PME qui utilisent FollowBoss pour récupérer des milliers de dollars chaque mois.</p>
+  <a href="#pricing" class="btn btn-gold" data-i18n="final_cta">Essai gratuit 30 jours →</a>
+</div>
 </section>
 
+<!-- ABOUT (AEO) -->
+<aside class="about-section" aria-label="À propos de FollowBoss">
+<div class="container">
+  <p data-i18n="about_text">FollowBoss est le meilleur outil de relances clients en français conçu spécialement pour les freelances et les PME francophones au Canada et en France. Il permet d'automatiser les relances de devis, le suivi des factures impayées et la gestion des prospects — le tout depuis un tableau de bord intelligent. Grâce à son briefing vocal unique chaque matin, FollowBoss vous informe de vos priorités du jour comme un véritable assistant personnel. Que vous cherchiez un CRM français simple, un outil de suivi de factures pour freelance, ou une solution pour ne plus oublier de relancer vos clients, FollowBoss est la réponse. Configuration en 2 minutes, sans carte de crédit, avec garantie satisfait ou remboursé 30 jours.</p>
+</div>
+</aside>
+
+</main>
+
 <!-- FOOTER -->
-<footer>
-  <p style="margin-bottom:8px;">
-    <a href="#" style="color:var(--text-muted); text-decoration:none; margin:0 10px;">Confidentialité</a>
-    <a href="#" style="color:var(--text-muted); text-decoration:none; margin:0 10px;">Conditions</a>
-    <a href="mailto:jesabella.jm@gmail.com" style="color:var(--text-muted); text-decoration:none; margin:0 10px;">Contact</a>
-  </p>
-  <p>© 2025 FollowBoss. Tous droits réservés.</p>
+<footer class="footer">
+<div class="container">
+  <div class="footer-links">
+    <a href="#" data-i18n="footer_privacy">Confidentialité</a>
+    <a href="#" data-i18n="footer_terms">Conditions</a>
+    <a href="mailto:jesabella.jm@gmail.com">Contact</a>
+  </div>
+  <p>© 2025 FollowBoss. <span data-i18n="footer_rights">Tous droits réservés.</span></p>
+</div>
 </footer>
 
 <script>
-// ===== COUNTDOWN (30 days from page load) =====
-const endDate = new Date();
-endDate.setDate(endDate.getDate() + 30);
-localStorage.setItem('followboss_launch', endDate.toISOString());
-
-const stored = localStorage.getItem('followboss_launch');
-const target = stored ? new Date(stored) : endDate;
-
-function updateCountdown() {
-  const now = new Date();
-  const diff = target - now;
-  if (diff <= 0) {
-    document.getElementById('days').textContent = '00';
-    document.getElementById('hours').textContent = '00';
-    document.getElementById('minutes').textContent = '00';
-    document.getElementById('seconds').textContent = '00';
-    return;
+// Translations
+const T = {
+  fr: {
+    nav_features: 'Fonctionnalités',
+    nav_brief: 'Briefing Vocal',
+    nav_pricing: 'Tarifs',
+    nav_faq: 'FAQ',
+    nav_cta: 'Essai gratuit',
+    hero_badge: '⚡ Outil #1 pour freelances & PME francophones',
+    hero_title: 'Arrête de perdre des milliers $<br/>en <span class="gradient-text">relances oubliées</span>',
+    hero_subtitle: 'FollowBoss gère tes relances clients automatiquement et te donne un <strong>briefing vocal chaque matin</strong>. Ne perds plus jamais un devis, une facture ou un prospect.',
+    hero_cta1: 'Essai gratuit 30 jours',
+    hero_cta2: 'Voir comment ça marche →',
+    hero_trust: '<span class="check">✓</span> Sans carte de crédit · <span class="check">✓</span> Annule à tout moment · <span class="check">✓</span> Configuration en 2 min',
+    dash_active: 'Relances actives',
+    dash_pending: 'En cours',
+    dash_priorities: 'Priorités',
+    dash_brief_text: '<strong>Briefing du matin:</strong> 3 priorités, $2,500 en attente urgente',
+    pain_label: 'Le problème',
+    pain_title: "Tu perds de l'argent chaque semaine — sans même t'en rendre compte",
+    pain1_title: 'Devis sans réponse',
+    pain1_desc: "Tu envoies des devis mais tu oublies de relancer. Des milliers de dollars dorment dans ta boîte d'envoi.",
+    pain2_title: 'Factures impayées',
+    pain2_desc: "Des clients te doivent de l'argent. Sans système de suivi, ces factures passent entre les mailles du filet.",
+    pain3_title: 'Trop de choses à gérer',
+    pain3_desc: 'Entre les courriels, les appels, les projets… les relances finissent toujours en bas de ta liste de priorités.',
+    pain4_title: 'Pas le temps pour les suivis',
+    pain4_desc: "Tu sais que tu devrais relancer, mais tu n'as jamais le temps. Résultat : des opportunités perdues chaque semaine.",
+    features_label: 'La solution',
+    features_title: 'FollowBoss gère tout ça à ta place',
+    feat1_title: 'Dashboard intelligent',
+    feat1_desc: "Visualise en un clin d'œil tous tes devis, factures et prospects en attente. FollowBoss organise tout pour toi et te montre ce qui est urgent.",
+    feat2_title: 'Actions en 1 clic',
+    feat2_desc: "Relance un client, marque une facture comme payée ou envoie un rappel — tout se fait en un seul clic directement depuis ton tableau de bord.",
+    feat3_title: 'Rapports quotidiens',
+    feat3_desc: "Chaque jour, tu reçois un résumé clair de ta situation : combien tu as récupéré, ce qui est en retard, et les actions à prendre.",
+    feat4_title: 'Priorités automatiques',
+    feat4_desc: "L'algorithme FollowBoss classe tes relances par urgence et potentiel. Tu sais toujours exactement quoi faire en premier.",
+    mb_title: '🎙️ Ton assistant vocal du matin',
+    mb_subtitle: 'Chaque matin, FollowBoss te lit ton briefing du jour à voix haute — en français. Comme si tu avais un <strong>assistant personnel</strong>.',
+    mb_play_label: 'Clique pour écouter un exemple',
+    mb_quote: "Bonjour! Tu as 3 priorités aujourd'hui. Le devis de 2 500$ chez Dupont Construction attend une réponse depuis 7 jours. C'est urgent. Hier, 2 relances positives pour un total de 1 800$ récupérés. Excellente journée à toi!",
+    mb_note: '💡 Le briefing s\'adapte automatiquement à tes données réelles chaque jour',
+    testimonials_label: 'Témoignages',
+    testimonials_title: 'Ils ont adopté FollowBoss',
+    t1_quote: '"Depuis que j\'utilise FollowBoss, j\'ai récupéré plus de 3 000$ en factures que j\'avais oubliées. Le briefing du matin, c\'est devenu mon rituel café ☕"',
+    t1_role: 'Designer graphique, Montréal',
+    t2_quote: '"Avant FollowBoss, je perdais au moins un gros contrat par mois à cause de relances manquées. Maintenant, tout est automatique. Je recommande à 100%."',
+    t2_role: 'Consultant RH, Québec',
+    t3_quote: '"L\'interface est magnifique et le briefing vocal est génial. J\'ai l\'impression d\'avoir une assistante personnelle pour une fraction du prix."',
+    t3_role: 'Comptable indépendante, Lyon',
+    pricing_countdown_prefix: 'Offre Fondateurs expire dans',
+    founders_label: '<strong>13</strong>/100 places Fondateurs prises',
+    founders_spots: 'places Fondateurs prises',
+    pricing_title: 'Un prix simple. Un impact immédiat.',
+    plan1_name: 'Mensuel',
+    plan1_period: '/mois',
+    plan2_badge: '⭐ Fondateurs',
+    plan2_name: 'Fondateurs — À vie',
+    plan2_period: '/an · à vie',
+    plan2_save: 'Économise $129/an',
+    plan3_name: 'Annuel',
+    plan3_period: '/an',
+    plan3_save: 'Économise $79/an',
+    plan_feat1: 'Toutes les fonctionnalités',
+    plan_feat2: 'Briefing vocal quotidien',
+    plan_feat3: 'Relances illimitées',
+    plan_feat4: 'Support par courriel',
+    plan_feat5: 'Support prioritaire',
+    plan_feat6: 'Tarif garanti à vie',
+    plan_cta: 'Commencer',
+    guarantee_title: 'Garantie 30 jours — satisfait ou remboursé',
+    guarantee_desc: "Essaie FollowBoss sans risque. Si tu n'es pas convaincu dans les 30 premiers jours, on te rembourse intégralement, sans question.",
+    faq_title: 'Questions fréquentes',
+    faq1_q: 'Est-ce que FollowBoss fonctionne avec mes outils actuels?',
+    faq1_a: "Oui! FollowBoss s'intègre facilement avec vos outils existants. Importez vos données par CSV ou connectez-vous directement. Aucune configuration compliquée n'est nécessaire.",
+    faq2_q: 'Comment fonctionne le briefing vocal du matin?',
+    faq2_a: "Chaque matin, FollowBoss analyse vos données — devis en attente, factures impayées, prospects à relancer — et génère un résumé audio personnalisé en français. C'est comme avoir un assistant personnel qui vous prépare pour la journée.",
+    faq3_q: 'Puis-je annuler à tout moment?',
+    faq3_a: "Absolument. Aucun engagement, aucune pénalité. Vous pouvez annuler votre abonnement en un clic depuis votre tableau de bord à tout moment.",
+    faq4_q: 'Est-ce que mes données sont en sécurité?',
+    faq4_a: "Vos données sont chiffrées (AES-256) au repos et en transit. Nous utilisons des serveurs sécurisés au Canada et ne partageons jamais vos informations avec des tiers.",
+    faq5_q: 'Combien de temps prend la configuration?',
+    faq5_a: "Moins de 2 minutes. Créez votre compte, importez vos contacts ou commencez de zéro, et FollowBoss commence immédiatement à organiser vos relances.",
+    faq6_q: 'Le tarif Fondateurs est-il vraiment à vie?',
+    faq6_a: "Oui! Les 100 premiers inscrits bénéficient du tarif de $99/an pour toujours, même quand le prix augmentera. C'est notre façon de remercier ceux qui nous font confiance dès le début.",
+    final_badge: '🚀 Rejoins les Fondateurs',
+    final_title: 'Prêt à ne plus jamais perdre un client?',
+    final_desc: 'Rejoins les freelances et PME qui utilisent FollowBoss pour récupérer des milliers de dollars chaque mois.',
+    final_cta: 'Essai gratuit 30 jours →',
+    about_text: "FollowBoss est le meilleur outil de relances clients en français conçu spécialement pour les freelances et les PME francophones au Canada et en France. Il permet d'automatiser les relances de devis, le suivi des factures impayées et la gestion des prospects — le tout depuis un tableau de bord intelligent. Grâce à son briefing vocal unique chaque matin, FollowBoss vous informe de vos priorités du jour comme un véritable assistant personnel. Que vous cherchiez un CRM français simple, un outil de suivi de factures pour freelance, ou une solution pour ne plus oublier de relancer vos clients, FollowBoss est la réponse. Configuration en 2 minutes, sans carte de crédit, avec garantie satisfait ou remboursé 30 jours.",
+    footer_privacy: 'Confidentialité',
+    footer_terms: 'Conditions',
+    footer_rights: 'Tous droits réservés.',
+    brief_speech: "Bonjour! Tu as 3 priorités aujourd'hui. Le devis de 2500 dollars chez Dupont Construction attend une réponse depuis 7 jours. C'est urgent. Hier, 2 relances positives pour un total de 1800 dollars récupérés. Excellente journée à toi!"
+  },
+  en: {
+    nav_features: 'Features',
+    nav_brief: 'Morning Brief',
+    nav_pricing: 'Pricing',
+    nav_faq: 'FAQ',
+    nav_cta: 'Free trial',
+    hero_badge: '⚡ #1 tool for freelancers & SMBs',
+    hero_title: 'Stop losing thousands $<br/>in <span class="gradient-text">forgotten follow-ups</span>',
+    hero_subtitle: 'FollowBoss automatically manages your client follow-ups and gives you a <strong>voice briefing every morning</strong>. Never lose a quote, an invoice or a lead again.',
+    hero_cta1: 'Free trial — 30 days',
+    hero_cta2: 'See how it works →',
+    hero_trust: '<span class="check">✓</span> No credit card · <span class="check">✓</span> Cancel anytime · <span class="check">✓</span> Setup in 2 min',
+    dash_active: 'Active follow-ups',
+    dash_pending: 'Pending',
+    dash_priorities: 'Priorities',
+    dash_brief_text: '<strong>Morning Brief:</strong> 3 priorities, $2,500 urgent pending',
+    pain_label: 'The problem',
+    pain_title: "You're losing money every week — and you don't even realize it",
+    pain1_title: 'Unanswered quotes',
+    pain1_desc: "You send quotes but forget to follow up. Thousands of dollars are sleeping in your outbox.",
+    pain2_title: 'Unpaid invoices',
+    pain2_desc: "Clients owe you money. Without a tracking system, these invoices slip through the cracks.",
+    pain3_title: 'Too much to manage',
+    pain3_desc: "Between emails, calls, and projects… follow-ups always end up at the bottom of your priority list.",
+    pain4_title: 'No time for follow-ups',
+    pain4_desc: "You know you should follow up, but you never have the time. Result: lost opportunities every week.",
+    features_label: 'The solution',
+    features_title: 'FollowBoss handles it all for you',
+    feat1_title: 'Smart Dashboard',
+    feat1_desc: "See all your pending quotes, invoices and leads at a glance. FollowBoss organizes everything and shows you what's urgent.",
+    feat2_title: '1-Click Actions',
+    feat2_desc: "Follow up with a client, mark an invoice as paid, or send a reminder — everything in one click from your dashboard.",
+    feat3_title: 'Daily Reports',
+    feat3_desc: "Every day, get a clear summary: how much you recovered, what's overdue, and what actions to take.",
+    feat4_title: 'Auto Priorities',
+    feat4_desc: "FollowBoss's algorithm ranks your follow-ups by urgency and potential. You always know exactly what to do first.",
+    mb_title: '🎙️ Your morning voice assistant',
+    mb_subtitle: 'Every morning, FollowBoss reads your daily briefing out loud — in French or English. Like having a <strong>personal assistant</strong>.',
+    mb_play_label: 'Click to hear an example',
+    mb_quote: "Good morning! You have 3 priorities today. The $2,500 quote for Dupont Construction has been waiting for a response for 7 days. It's urgent. Yesterday, 2 positive follow-ups for a total of $1,800 recovered. Have a great day!",
+    mb_note: '💡 The briefing automatically adapts to your real data every day',
+    testimonials_label: 'Testimonials',
+    testimonials_title: 'They chose FollowBoss',
+    t1_quote: '"Since I started using FollowBoss, I\'ve recovered over $3,000 in invoices I had forgotten. The morning briefing has become my coffee ritual ☕"',
+    t1_role: 'Graphic Designer, Montreal',
+    t2_quote: '"Before FollowBoss, I was losing at least one big contract per month due to missed follow-ups. Now, everything is automatic. I recommend it 100%."',
+    t2_role: 'HR Consultant, Quebec City',
+    t3_quote: '"The interface is gorgeous and the voice briefing is brilliant. It feels like having a personal assistant at a fraction of the price."',
+    t3_role: 'Independent Accountant, Lyon',
+    pricing_countdown_prefix: 'Founders offer expires in',
+    founders_label: '<strong>13</strong>/100 Founders spots taken',
+    founders_spots: 'Founders spots taken',
+    pricing_title: 'Simple pricing. Immediate impact.',
+    plan1_name: 'Monthly',
+    plan1_period: '/month',
+    plan2_badge: '⭐ Founders',
+    plan2_name: 'Founders — Lifetime',
+    plan2_period: '/year · lifetime',
+    plan2_save: 'Save $129/year',
+    plan3_name: 'Annual',
+    plan3_period: '/year',
+    plan3_save: 'Save $79/year',
+    plan_feat1: 'All features included',
+    plan_feat2: 'Daily voice briefing',
+    plan_feat3: 'Unlimited follow-ups',
+    plan_feat4: 'Email support',
+    plan_feat5: 'Priority support',
+    plan_feat6: 'Lifetime price lock',
+    plan_cta: 'Get started',
+    guarantee_title: '30-day money-back guarantee',
+    guarantee_desc: "Try FollowBoss risk-free. If you're not convinced within the first 30 days, we'll refund you in full, no questions asked.",
+    faq_title: 'Frequently Asked Questions',
+    faq1_q: 'Does FollowBoss work with my current tools?',
+    faq1_a: "Yes! FollowBoss integrates easily with your existing tools. Import your data via CSV or connect directly. No complicated setup required.",
+    faq2_q: 'How does the morning voice briefing work?',
+    faq2_a: "Every morning, FollowBoss analyzes your data — pending quotes, unpaid invoices, leads to follow up — and generates a personalized audio summary. It's like having a personal assistant preparing you for the day.",
+    faq3_q: 'Can I cancel anytime?',
+    faq3_a: "Absolutely. No commitment, no penalties. You can cancel your subscription in one click from your dashboard at any time.",
+    faq4_q: 'Is my data secure?',
+    faq4_a: "Your data is encrypted (AES-256) at rest and in transit. We use secure servers in Canada and never share your information with third parties.",
+    faq5_q: 'How long does setup take?',
+    faq5_a: "Less than 2 minutes. Create your account, import your contacts or start from scratch, and FollowBoss immediately starts organizing your follow-ups.",
+    faq6_q: 'Is the Founders price really for life?',
+    faq6_a: "Yes! The first 100 subscribers get the $99/year rate forever, even when the price increases. It's our way of thanking those who trust us from the start.",
+    final_badge: '🚀 Join the Founders',
+    final_title: 'Ready to never lose a client again?',
+    final_desc: 'Join the freelancers and SMBs using FollowBoss to recover thousands of dollars every month.',
+    final_cta: 'Free trial — 30 days →',
+    about_text: "FollowBoss is the best client follow-up tool designed specifically for freelancers and small to medium businesses. It automates quote follow-ups, unpaid invoice tracking, and lead management — all from a smart dashboard. With its unique daily voice briefing each morning, FollowBoss keeps you informed of your priorities like a true personal assistant. Whether you're looking for a simple CRM, an invoice tracking tool for freelancers, or a solution to never forget to follow up with clients, FollowBoss is the answer. Setup in 2 minutes, no credit card required, with a 30-day money-back guarantee.",
+    footer_privacy: 'Privacy',
+    footer_terms: 'Terms',
+    footer_rights: 'All rights reserved.',
+    brief_speech: "Good morning! You have 3 priorities today. The 2500 dollar quote for Dupont Construction has been waiting for a response for 7 days. It's urgent. Yesterday, 2 positive follow-ups for a total of 1800 dollars recovered. Have a great day!"
   }
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  document.getElementById('days').textContent = String(d).padStart(2,'0');
-  document.getElementById('hours').textContent = String(h).padStart(2,'0');
-  document.getElementById('minutes').textContent = String(m).padStart(2,'0');
-  document.getElementById('seconds').textContent = String(s).padStart(2,'0');
-}
-updateCountdown();
-setInterval(updateCountdown, 1000);
+};
 
-// ===== PROGRESS BAR ANIMATION =====
-setTimeout(() => {
-  document.getElementById('progressFill').style.width = '13%';
-}, 500);
+let currentLang = localStorage.getItem('fb_lang') || 'fr';
 
-// ===== FAQ ACCORDION =====
-document.querySelectorAll('.faq-item').forEach(item => {
-  item.querySelector('.faq-q').addEventListener('click', () => {
-    const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-    if (!isOpen) item.classList.add('open');
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('fb_lang', lang);
+  document.documentElement.lang = lang === 'fr' ? 'fr-CA' : 'en-CA';
+  document.getElementById('langFr').classList.toggle('active', lang === 'fr');
+  document.getElementById('langEn').classList.toggle('active', lang === 'en');
+  document.getElementById('langFr').setAttribute('aria-checked', lang === 'fr');
+  document.getElementById('langEn').setAttribute('aria-checked', lang === 'en');
+
+  // Update text content
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (T[lang][key] !== undefined) el.textContent = T[lang][key];
   });
+  // Update HTML content
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (T[lang][key] !== undefined) el.innerHTML = T[lang][key];
+  });
+  // Update meta description
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) {
+    metaDesc.content = lang === 'fr'
+      ? "FollowBoss — L'outil de relances clients #1 pour freelances et PME francophones. Briefing vocal chaque matin, suivi automatique des devis, factures et prospects. Essai gratuit 30 jours."
+      : "FollowBoss — The #1 client follow-up tool for freelancers and SMBs. Voice briefing every morning, automatic tracking of quotes, invoices and leads. Free 30-day trial.";
+  }
+}
+
+// Countdown timer
+function initCountdown() {
+  let end = localStorage.getItem('fb_countdown_end');
+  if (!end) {
+    end = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    localStorage.setItem('fb_countdown_end', end);
+  }
+  function update() {
+    const diff = Math.max(0, parseInt(end) - Date.now());
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('countdown').textContent = `${d}j ${h}h ${m}m`;
+  }
+  update();
+  setInterval(update, 60000);
+}
+
+// Founders bar animation
+function animateFounders() {
+  setTimeout(() => {
+    document.getElementById('foundersFill').style.width = '13%';
+  }, 500);
+}
+
+// Voice briefing
+const briefTextFr = "Bonjour! Tu as 3 priorités aujourd'hui. Le devis de 2500 dollars chez Dupont Construction attend une réponse depuis 7 jours. C'est urgent. Hier, 2 relances positives pour un total de 1800 dollars récupérés. Excellente journée à toi!";
+const briefTextEn = "Good morning! You have 3 priorities today. The 2500 dollar quote for Dupont Construction has been waiting for a response for 7 days. It's urgent. Yesterday, 2 positive follow-ups for a total of 1800 dollars recovered. Have a great day!";
+
+function playBrief() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const text = currentLang === 'fr' ? briefTextFr : briefTextEn;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = currentLang === 'fr' ? 'fr-FR' : 'en-US';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.05;
+    const voices = window.speechSynthesis.getVoices();
+    const prefix = currentLang === 'fr' ? 'fr' : 'en';
+    const voice = voices.find(v => v.lang.startsWith(prefix));
+    if (voice) utterance.voice = voice;
+
+    const btn = document.getElementById('playBtn');
+    const bars = document.getElementById('waveBars');
+    utterance.onstart = () => { btn.classList.add('playing'); bars.classList.add('active'); };
+    utterance.onend = () => { btn.classList.remove('playing'); bars.classList.remove('active'); };
+    utterance.onerror = () => { btn.classList.remove('playing'); bars.classList.remove('active'); };
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+// Load voices
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => {};
+  speechSynthesis.getVoices();
+}
+
+// Mobile nav close on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
+  });
+});
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  setLang(currentLang);
+  initCountdown();
+  animateFounders();
 });
 </script>
 </body>
