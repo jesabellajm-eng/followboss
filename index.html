@@ -955,6 +955,68 @@ h3 { font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 700; line-height: 1.3; 
 </section>
 
 <!-- FINAL CTA -->
+<!-- PRE-INSCRIPTION SECTION -->
+<section id="waitlist" aria-label="Liste d'attente" role="region" style="padding:80px 0; background: linear-gradient(180deg, transparent 0%, rgba(56,189,248,0.04) 50%, transparent 100%);">
+  <div class="container" style="max-width:600px; margin:0 auto; text-align:center; padding:0 24px;">
+    <div class="badge" style="margin-bottom:20px;">🚀 Accès anticipé</div>
+    <h2 style="margin-bottom:16px;" data-i18n-html="waitlist_title">Rejoins la liste d'attente<br/><span class="gradient-text">et obtiens 30 jours gratuits</span></h2>
+    <p style="color:var(--text-secondary); margin-bottom:40px; font-size:1.05rem;" data-i18n="waitlist_subtitle">Sois parmi les premiers à accéder à FollowBoss. Les membres fondateurs reçoivent un accès prioritaire et un tarif exclusif verrouillé à vie.</p>
+    
+    <form action="https://formspree.io/f/xpwzgqld" method="POST" id="waitlistForm" style="display:flex; flex-direction:column; gap:16px;">
+      <input type="text" name="name" placeholder="Ton prénom" required
+        style="padding:16px 20px; border-radius:12px; border:1px solid rgba(56,189,248,0.2); background:rgba(255,255,255,0.04); color:#fff; font-size:1rem; outline:none; font-family:inherit;"
+        onfocus="this.style.borderColor='rgba(56,189,248,0.6)'" onblur="this.style.borderColor='rgba(56,189,248,0.2)'"
+      />
+      <input type="email" name="email" placeholder="Ton adresse email" required
+        style="padding:16px 20px; border-radius:12px; border:1px solid rgba(56,189,248,0.2); background:rgba(255,255,255,0.04); color:#fff; font-size:1rem; outline:none; font-family:inherit;"
+        onfocus="this.style.borderColor='rgba(56,189,248,0.6)'" onblur="this.style.borderColor='rgba(56,189,248,0.2)'"
+      />
+      <select name="metier" required
+        style="padding:16px 20px; border-radius:12px; border:1px solid rgba(56,189,248,0.2); background:#0a0f1a; color:var(--text-secondary); font-size:1rem; outline:none; font-family:inherit; cursor:pointer;"
+        onfocus="this.style.borderColor='rgba(56,189,248,0.6)'" onblur="this.style.borderColor='rgba(56,189,248,0.2)'"
+      >
+        <option value="" disabled selected>Ton type de métier</option>
+        <option value="freelance">Freelance / Consultant</option>
+        <option value="coach">Coach / Formateur</option>
+        <option value="agent-immo">Agent immobilier</option>
+        <option value="pme">Propriétaire PME</option>
+        <option value="autre">Autre</option>
+      </select>
+      <input type="hidden" name="_subject" value="🚀 Nouvelle pré-inscription FollowBoss!" />
+      <input type="hidden" name="_next" value="https://followboss.ca/#waitlist" />
+      <button type="submit" class="btn btn-gold" style="width:100%; padding:18px; font-size:1.05rem; border:none; cursor:pointer;">
+        Je rejoins la liste d'attente →
+      </button>
+    </form>
+
+    <p style="margin-top:20px; color:var(--text-secondary); font-size:.85rem; opacity:0.7;">
+      🔒 Zéro spam. Désabonnement en 1 clic. Tes données restent privées.
+    </p>
+
+    <!-- Success message -->
+    <div id="waitlistSuccess" style="display:none; margin-top:24px; padding:20px; border-radius:12px; background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); color:var(--emerald);">
+      ✅ Tu es sur la liste! On te contacte dès l'ouverture.
+    </div>
+  </div>
+</section>
+
+<script>
+document.getElementById('waitlistForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  try {
+    const res = await fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
+    if (res.ok) {
+      form.style.display = 'none';
+      document.getElementById('waitlistSuccess').style.display = 'block';
+    }
+  } catch(err) {
+    form.submit();
+  }
+});
+</script>
+
 <section class="final-cta" aria-label="Appel à l'action" role="region">
 <div class="container" style="max-width:640px">
   <div class="badge badge-gold" data-i18n="final_badge">🚀 Rejoins les Fondateurs</div>
@@ -1080,6 +1142,8 @@ const T = {
     footer_privacy: 'Confidentialité',
     footer_terms: 'Conditions',
     footer_rights: 'Tous droits réservés.',
+    waitlist_title: 'Rejoins la liste d\'attente<br/><span class="gradient-text">et obtiens 30 jours gratuits</span>',
+    waitlist_subtitle: 'Sois parmi les premiers à accéder à FollowBoss. Les membres fondateurs reçoivent un accès prioritaire et un tarif exclusif verrouillé à vie.',
     brief_speech: "Bonjour! Tu as 3 priorités aujourd'hui. Le devis de 2500 dollars chez Dupont Construction attend une réponse depuis 7 jours. C'est urgent. Hier, 2 relances positives pour un total de 1800 dollars récupérés. Excellente journée à toi!"
   },
   en: {
@@ -1174,6 +1238,8 @@ const T = {
     footer_privacy: 'Privacy',
     footer_terms: 'Terms',
     footer_rights: 'All rights reserved.',
+    waitlist_title: 'Join the waitlist<br/><span class="gradient-text">and get 30 days free</span>',
+    waitlist_subtitle: 'Be among the first to access FollowBoss. Founding members get priority access and an exclusive lifetime rate.',
     brief_speech: "Good morning! You have 3 priorities today. The 2500 dollar quote for Dupont Construction has been waiting for a response for 7 days. It's urgent. Yesterday, 2 positive follow-ups for a total of 1800 dollars recovered. Have a great day!"
   }
 };
