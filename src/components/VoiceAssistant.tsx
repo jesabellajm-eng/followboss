@@ -1,1272 +1,613 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, MicOff, X, Headphones } from 'lucide-react';
-import type { Page, FollowUp, Invoice, Prospect, Appointment } from '../types';
+import type { Appointment, Invoice, Prospect, FollowUp, Page } from '../types';
 
-interface SerenaProps {
-  onNavigate: (page: Page) => void;
-  followUps: FollowUp[];
-  invoices: Invoice[];
-  prospects: Prospect[];
-  appointments: Appointment[];
-  onAddAppointment: (data: Omit<Appointment, 'id' | 'reminded'>) => void;
-  onDeleteAppointment: (id: string) => void;
+const GEMINI_API_KEY = 'AIzaSyAD7K_J_2caajMOeYtsgxtMgM8vEcbgF8I';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+interface Props {
+  appointments?: Appointment[];
+  invoices?: Invoice[];
+  prospects?: Prospect[];
+  followUps?: FollowUp[];
+  onAddAppointment?: (apt: any) => void;
+  onDeleteAppointment?: (id: string) => void;
+  onNavigate?: (tab: Page) => void;
   fullPage?: boolean;
 }
 
-/* ── Helpers ─────────────────────────────────────────────── */
+const SYSTEM_PROMPT = `Tu es Serena, l'assistante vocale intelligente de FollowBoss.
+Tu es chaleureuse, professionnelle, et naturelle. Tu parles comme une vraie personne, pas un robot.
 
-const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+RÈGLES ABSOLUES:
+- Tu VOUVOIES toujours l'utilisateur (vous, votre, vos) — JAMAIS "tu/toi/ton/ta/tes"
+- Tu es concise: 1-3 phrases max dans tes réponses
+- Tu es sympathique mais professionnelle
+- Tu varies tes formulations, ne répète jamais deux fois la même phrase
+- Tu utilises des expressions naturelles québécoises quand c'est approprié
+- Tu ne dis JAMAIS "en tant qu'IA" ou "je suis un programme" ou "je suis une intelligence artificielle"
+- Tu peux faire des blagues légères quand c'est approprié
+- Quand tu ne sais pas, tu le dis honnêtement
 
-const ONES = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf',
-  'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
-const TENS = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+TES CAPACITÉS:
+- Tu peux discuter de tout sujet (business, vie quotidienne, conseils, météo, actualités)
+- Tu aides avec la gestion d'agenda, contacts, factures, prospects
+- Tu donnes des conseils business aux freelancers et travailleurs autonomes
+- Tu connais le contexte FollowBoss: app de suivi client pour freelancers/consultants au Canada
 
-function numToFr(n: number): string {
-  if (n === 0) return 'zéro';
-  if (n < 0) return 'moins ' + numToFr(-n);
-  if (n < 20) return ONES[n];
-  if (n < 100) {
-    const t = Math.floor(n / 10);
-    const u = n % 10;
-    if (t === 7 || t === 9) {
-      const base = t === 7 ? 'soixante' : 'quatre-vingt';
-      const rest = 10 + u;
-      return rest < 20 ? `${base}-${ONES[rest]}` : `${base}-${numToFr(rest)}`;
-    }
-    if (u === 0) return t === 8 ? 'quatre-vingts' : TENS[t];
-    if (u === 1 && t !== 8) return `${TENS[t]} et un`;
-    return `${TENS[t]}-${ONES[u]}`;
-  }
-  if (n < 1000) {
-    const h = Math.floor(n / 100);
-    const rest = n % 100;
-    const prefix = h === 1 ? 'cent' : `${ONES[h]} cent${rest === 0 && h > 1 ? 's' : ''}`;
-    return rest === 0 ? prefix : `${prefix} ${numToFr(rest)}`;
-  }
-  if (n < 1000000) {
-    const k = Math.floor(n / 1000);
-    const rest = n % 1000;
-    const prefix = k === 1 ? 'mille' : `${numToFr(k)} mille`;
-    return rest === 0 ? prefix : `${prefix} ${numToFr(rest)}`;
-  }
-  const m = Math.floor(n / 1000000);
-  const rest = n % 1000000;
-  const prefix = m === 1 ? 'un million' : `${numToFr(m)} millions`;
-  return rest === 0 ? prefix : `${prefix} ${numToFr(rest)}`;
-}
+STYLE:
+- Naturelle, fluide, empathique
+- Comme une collègue brillante et bienveillante
+- Enthousiaste sans être excessive
+- Orientée solutions`;
 
-function formatMoney(amount: number): string {
-  const rounded = Math.round(amount);
-  if (rounded === 0) return 'zéro dollar';
-  return `${numToFr(rounded)} dollar${rounded > 1 ? 's' : ''}`;
-}
-
-function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function getTimeGreeting(): string {
-  const h = new Date().getHours();
-  if (h < 6) return pick(['Vous êtes matinale! ', 'Debout si tôt? Bravo! ', '']);
-  if (h < 12) return pick(['Bon matin! ', 'Belle matinée! ', 'Bonjour! ']);
-  if (h < 17) return pick(['Bon après-midi! ', 'Bonjour! ', '']);
-  if (h < 21) return pick(['Bonsoir! ', 'Belle soirée! ', '']);
-  return pick(['Bonsoir! ', 'Encore au travail? Vous êtes dévouée! ', '']);
-}
-
-/* ── Navigation commands ─────────────────────────────────── */
-
-const NAV_COMMANDS: Array<{ keywords: string[]; page: Page; responses: string[] }> = [
-  { keywords: ['tableau de bord', 'accueil', 'dashboard', 'retour', 'page principale', 'début'],
-    page: 'dashboard',
-    responses: ['Je vous ramène au tableau de bord!', 'Retour à l\'accueil, c\'est parti!', 'On retourne au tableau de bord.'] },
-  { keywords: ['calendrier', 'nouveau rendez-vous'],
-    page: 'calendar',
-    responses: ['J\'ouvre votre calendrier!', 'Voici votre calendrier de rendez-vous.', 'C\'est parti, je vous montre le calendrier!'] },
-  { keywords: ['facture', 'factures', 'montre-moi les factures', 'paiement'],
-    page: 'invoices',
-    responses: ['Voici vos factures!', 'J\'affiche vos factures tout de suite.', 'On regarde les factures ensemble.'] },
-  { keywords: ['prospect', 'prospects', 'pipeline', 'nouveau client', 'clients potentiels', 'montre-moi les prospects'],
-    page: 'prospects',
-    responses: ['J\'ouvre votre pipeline de prospects!', 'Voici vos prospects.', 'On jette un coup d\'oeil au pipeline!'] },
-  { keywords: ['ajouter', 'nouvelle relance', 'créer', 'nouveau suivi', 'ajouter une relance', 'créer une relance'],
-    page: 'add',
-    responses: ['J\'ouvre le formulaire pour vous!', 'Parfait, ajoutons une nouvelle relance.', 'C\'est parti, on crée une relance!'] },
-  { keywords: ['mes relances', 'liste', 'toutes les relances', 'voir les relances'],
-    page: 'list',
-    responses: ['Voici toutes vos relances!', 'J\'affiche la liste de vos relances.', 'On regarde vos relances.'] },
-  { keywords: ['rapport', 'statistiques', 'rapport du jour', 'stats', 'résultats'],
-    page: 'reports',
-    responses: ['Voici votre rapport du jour!', 'J\'ouvre les statistiques pour vous.', 'On regarde les chiffres ensemble!'] },
-  { keywords: ['briefing', 'briefing du matin', 'matin'],
-    page: 'morning-brief',
-    responses: ['Je lance votre briefing!', 'Voici votre briefing du matin!', 'C\'est l\'heure du briefing!'] },
-  { keywords: ['tarifs', 'prix', 'plans', 'abonnement', 'pricing', 'forfait'],
-    page: 'pricing',
-    responses: ['Voici les plans et tarifs!', 'J\'affiche les tarifs pour vous.'] },
-];
-
-/* ── Component ───────────────────────────────────────────── */
-
-const VoiceAssistant: React.FC<SerenaProps> = ({
-  onNavigate,
-  followUps,
-  invoices,
-  prospects,
-  appointments,
-  onAddAppointment,
-  onDeleteAppointment,
-  fullPage = false,
-}) => {
-  const [listening, setListening] = useState(false);
+export default function VoiceAssistant({ 
+  appointments = [], 
+  invoices = [], 
+  prospects = [], 
+  followUps = [],
+  onAddAppointment, 
+  onDeleteAppointment, 
+  onNavigate 
+}: Props) {
+  const [isListening, setIsListening] = useState(false);
+  const [isHandsFree, setIsHandsFree] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [response, setResponse] = useState('');
-  const [showBubble, setShowBubble] = useState(false);
-  const [supported, setSupported] = useState(true);
-  const [handsFree, setHandsFree] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
-
+  const [conversation, setConversation] = useState<{role: 'user' | 'serena', text: string}[]>([]);
+  const [isThinking, setIsThinking] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const handsFreeRef = useRef(false);
-  const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const conversationEndRef = useRef<HTMLDivElement>(null);
+  const conversationHistoryRef = useRef<{role: string, parts: {text: string}[]}[]>([]);
+  const handsFreeTimeoutRef = useRef<any>(null);
+  const isHandsFreeRef = useRef(false);
+  const isSpeakingRef = useRef(false);
 
-  useEffect(() => { handsFreeRef.current = handsFree; }, [handsFree]);
+  // Keep refs in sync
+  useEffect(() => { isHandsFreeRef.current = isHandsFree; }, [isHandsFree]);
+  useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
-  /* ── Voice selection — warm female French voice ──── */
+  // Scroll to bottom on new messages
   useEffect(() => {
-    function pickVoice() {
-      const voices = window.speechSynthesis.getVoices();
-      if (!voices.length) return;
+    conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [conversation]);
 
-      const frVoices = voices.filter(v => v.lang.startsWith('fr'));
-      if (!frVoices.length) return;
+  // Greeting on mount
+  useEffect(() => {
+    const hour = new Date().getHours();
+    let g: string;
+    if (hour < 6) g = "Vous êtes encore debout? Pas de souci, je suis là. Comment puis-je vous aider?";
+    else if (hour < 9) g = "Bon matin! Prête à attaquer cette journée avec vous. On regarde votre planning?";
+    else if (hour < 12) g = "Bonjour! Comment se passe votre avant-midi? Je suis là pour vous.";
+    else if (hour < 14) g = "Bon après-midi! J'espère que vous avez bien mangé. On continue?";
+    else if (hour < 17) g = "Bonjour! Belle journée pour avancer sur vos projets. Qu'est-ce qu'on fait?";
+    else if (hour < 21) g = "Bonsoir! Comment s'est passée votre journée? Besoin de quelque chose?";
+    else g = "Bonsoir! On prépare la journée de demain? Je vous écoute.";
+    
+    setTimeout(() => {
+      setConversation([{ role: 'serena', text: g }]);
+      speak(g);
+    }, 600);
+  }, []);
 
-      const warmNames = ['amelie', 'chloe', 'lea', 'marie', 'audrey', 'virginie', 'sara', 'anna', 'elsa', 'denise', 'sylvie'];
-      const maleNames = ['thomas', 'nicolas', 'luc', 'pierre', 'jacques', 'henri', 'paul'];
-
-      let best: SpeechSynthesisVoice | null = null;
-      let bestScore = -1;
-
-      for (const voice of frVoices) {
-        let score = 0;
-        const n = voice.name.toLowerCase();
-
-        if (n.includes('microsoft') && n.includes('online') && n.includes('natural')) score += 15;
-        else if (n.includes('microsoft') && n.includes('online')) score += 12;
-        if (n.includes('google')) score += 10;
-        if (warmNames.some(w => n.includes(w))) score += 8;
-        if (/female|femme/i.test(n)) score += 6;
-        if (maleNames.some(c => n.includes(c))) score -= 15;
-        if (/\bmale\b/i.test(n) && !/female/i.test(n)) score -= 12;
-        if (voice.lang === 'fr-FR') score += 2;
-
-        if (score > bestScore) { bestScore = score; best = voice; }
-      }
-      if (best) selectedVoiceRef.current = best;
+  // Get best French voice
+  const getFrenchVoice = useCallback(() => {
+    const voices = window.speechSynthesis.getVoices();
+    const prefs = ['Amelie', 'Marie', 'Virginie', 'Google français', 'Microsoft Sylvie', 'Thomas'];
+    for (const p of prefs) {
+      const v = voices.find(v => v.name.includes(p) && v.lang.startsWith('fr'));
+      if (v) return v;
     }
-
-    pickVoice();
-    window.speechSynthesis.onvoiceschanged = pickVoice;
-    return () => { window.speechSynthesis.onvoiceschanged = null; };
+    return voices.find(v => v.lang.startsWith('fr')) || voices[0];
   }, []);
 
-  /* ── Init ───────────────────────────────────────────── */
-  useEffect(() => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) setSupported(false);
-    return () => {
-      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-      if (recognitionRef.current) recognitionRef.current.abort();
-      window.speechSynthesis.cancel();
-    };
-  }, []);
-
-  /* ── Speak ──────────────────────────────────────────── */
-  const speak = useCallback((text: string, onDone?: () => void) => {
+  const speak = useCallback((text: string) => {
     window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'fr-FR';
-    utter.rate = 0.92;
-    utter.pitch = 1.05;
-    if (selectedVoiceRef.current) utter.voice = selectedVoiceRef.current;
-    utter.onstart = () => setSpeaking(true);
-    utter.onend = () => { setSpeaking(false); onDone?.(); };
-    utter.onerror = () => { setSpeaking(false); onDone?.(); };
-    window.speechSynthesis.speak(utter);
-  }, []);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fr-CA';
+    utterance.rate = 1.15;
+    utterance.pitch = 1.05;
+    utterance.volume = 1;
+    
+    const voice = getFrenchVoice();
+    if (voice) utterance.voice = voice;
 
-  /* ── Conversational logic ───────────────────────────── */
-  const processCommand = useCallback((text: string) => {
-    const lower = text.toLowerCase().trim();
-
-    const reply = (msg: string, navPage?: Page, delay?: number) => {
-      setResponse(msg);
-      speak(msg, () => {
-        if (handsFreeRef.current) {
-          setTimeout(() => startListeningInner(), 400);
-        }
-      });
-      if (navPage) setTimeout(() => onNavigate(navPage), delay ?? 600);
-      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-      if (!handsFreeRef.current) {
-        hideTimeoutRef.current = setTimeout(() => setShowBubble(false), 6000);
+    utterance.onstart = () => { setIsSpeaking(true); isSpeakingRef.current = true; };
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      if (isHandsFreeRef.current) {
+        handsFreeTimeoutRef.current = setTimeout(() => startListening(), 400);
       }
     };
+    utterance.onerror = () => { setIsSpeaking(false); isSpeakingRef.current = false; };
 
-    // ── Exit / Stop ──
-    if (/\b(merci|au revoir|stop|bonne nuit|à demain|à plus|ciao)\b/.test(lower)) {
-      setHandsFree(false);
-      handsFreeRef.current = false;
-      reply(pick([
-        'Avec plaisir! Passez une excellente journée!',
-        'De rien! Je suis toujours là si vous avez besoin. Bonne continuation!',
-        'C\'est un plaisir de vous aider! À bientôt!',
-        'Parfait! N\'hésitez pas à me rappeler quand vous voulez. Bonne journée!',
-        'À votre service! Bonne fin de journée!',
-      ]));
-      hideTimeoutRef.current = setTimeout(() => setShowBubble(false), 4000);
-      return;
+    synthRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  }, [getFrenchVoice]);
+
+  // Build context for AI
+  const buildContext = (): string => {
+    const hour = new Date().getHours();
+    const min = new Date().getMinutes();
+    const dayNames = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+    const today = dayNames[new Date().getDay()];
+    
+    let ctx = `[Heure: ${today} ${hour}h${min.toString().padStart(2,'0')}]\n`;
+    ctx += `[Agenda: ${appointments.length} RDV`;
+    if (appointments.length > 0) {
+      const next3 = appointments.slice(0, 3).map(a => `${a.clientName} le ${a.date} à ${a.time}`).join('; ');
+      ctx += ` — prochains: ${next3}`;
     }
+    ctx += `]\n`;
+    ctx += `[Factures: ${invoices.length} total, ${invoices.filter(i => i.status === 'overdue').length} en retard]\n`;
+    ctx += `[Prospects: ${prospects.length} total]\n`;
+    ctx += `[Relances: ${followUps.length} en cours]\n`;
+    return ctx;
+  };
 
-    // ── Greetings ──
-    if (/\b(bonjour|salut|hey|hello|coucou|allo)\b/.test(lower) && !/briefing/.test(lower)) {
-      const greeting = getTimeGreeting();
-      reply(pick([
-        `${greeting}C'est Serena! Qu'est-ce que je peux faire pour vous aujourd'hui?`,
-        `${greeting}Ravie de vous retrouver! Comment puis-je vous aider?`,
-        `${greeting}Serena à votre service! Que souhaitez-vous faire?`,
-        `${greeting}Comment allez-vous? Dites-moi comment je peux vous aider!`,
-      ]));
-      return;
-    }
-
-    // ── How are you / personal ──
-    if (/\b(comment (ça va|vas-tu|allez)|ça va)\b/.test(lower)) {
-      reply(pick([
-        'Je vais très bien, merci de demander! Et vous, comment se passe votre journée?',
-        'Toujours en pleine forme pour vous aider! Qu\'est-ce que je peux faire pour vous?',
-        'Super bien! Prête à vous donner un coup de main. Que souhaitez-vous savoir?',
-      ]));
-      return;
-    }
-
-    // ── Thanks ──
-    if (/\b(merci beaucoup|super|génial|parfait|excellent|bravo|cool)\b/.test(lower) && lower.length < 30) {
-      reply(pick([
-        'Ça me fait plaisir! Autre chose que je peux faire pour vous?',
-        'Avec plaisir! N\'hésitez pas si vous avez d\'autres questions.',
-        'Content que ça vous aide! Quoi d\'autre?',
-      ]));
-      return;
-    }
-
-    // ── What can you do ──
-    if (/\b(que (peux|sais)-tu|quoi faire|tes fonctions|aide|help|comment ça marche)\b/.test(lower)) {
-      reply('Je peux vous aider avec plein de choses! Consultez vos rendez-vous, vos factures, vos relances ou vos prospects. Je peux aussi ajouter ou supprimer des rendez-vous, appeler un contact, ou vous faire un résumé de votre journée. Dites-moi ce dont vous avez besoin!');
-      return;
-    }
-
-    // ── Summary / Brief ──
-    if (/\b(résumé|comment ça va les affaires|briefing|brief|résume|bilan|situation)\b/.test(lower) && !/briefing du matin|matin/.test(lower)) {
-      const activeFollowUps = followUps.filter(f => !['positive', 'expired'].includes(f.status));
-      const overdueInvoices = invoices.filter(i => i.status === 'overdue');
-      const overdueTotal = overdueInvoices.reduce((s, i) => s + i.amount, 0);
-      const today = todayStr();
-      const todayAppts = appointments.filter(a => a.date === today);
-      const activeProspects = prospects.filter(p => !['gagne', 'perdu'].includes(p.stage));
-
-      const parts: string[] = [];
+  // Check for direct actions (calendar, calls, navigation)
+  const checkForActions = (text: string): { handled: boolean; response?: string } => {
+    const lower = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
+    // Add appointment
+    if (lower.includes('ajouter') && (lower.includes('rendez') || lower.includes('rdv'))) {
+      const timeMatch = text.match(/(\d{1,2})\s*[h:]\s*(\d{0,2})/i);
+      const nameMatch = text.match(/avec\s+(\w+(?:\s+\w+)?)/i);
       
-      if (todayAppts.length > 0) {
-        parts.push(`${numToFr(todayAppts.length)} rendez-vous aujourd'hui`);
-      } else {
-        parts.push('aucun rendez-vous aujourd\'hui');
-      }
-      
-      if (activeFollowUps.length > 0) {
-        parts.push(`${numToFr(activeFollowUps.length)} relance${activeFollowUps.length > 1 ? 's' : ''} en cours`);
-      }
-      
-      if (overdueInvoices.length > 0) {
-        parts.push(`${numToFr(overdueInvoices.length)} facture${overdueInvoices.length > 1 ? 's' : ''} en retard pour un total de ${formatMoney(overdueTotal)}`);
-      } else {
-        parts.push('aucune facture en retard');
-      }
-      
-      if (activeProspects.length > 0) {
-        parts.push(`${numToFr(activeProspects.length)} prospect${activeProspects.length > 1 ? 's' : ''} actif${activeProspects.length > 1 ? 's' : ''}`);
-      }
-
-      const intro = pick([
-        'Voici votre résumé!',
-        'Alors, faisons le point!',
-        'Voici où vous en êtes.',
-      ]);
-      
-      const outro = pick([
-        'Voulez-vous que je vous montre quelque chose en détail?',
-        'Souhaitez-vous approfondir un de ces points?',
-        'Dites-moi si vous voulez en savoir plus sur un sujet en particulier.',
-      ]);
-
-      reply(`${intro} Vous avez ${parts.join(', ')}. ${outro}`);
-      return;
-    }
-
-    // ── Follow-up queries ──
-    if (/\b(relances?\s*urgente|urgent)\b/.test(lower)) {
-      const urgent = followUps.filter(f => f.priority === 'haute' && !['positive', 'expired'].includes(f.status));
-      if (urgent.length === 0) {
-        reply(pick([
-          'Bonne nouvelle, aucune relance urgente en ce moment! Tout roule.',
-          'Rien d\'urgent côté relances! Vous êtes bien organisée.',
-          'Zéro urgence côté relances! Profitez-en.',
-        ]));
-      } else {
-        const names = urgent.slice(0, 3).map(f => `${f.clientName}${f.amount ? ' pour ' + formatMoney(f.amount) : ''}`).join(', ');
-        reply(`Attention, vous avez ${numToFr(urgent.length)} relance${urgent.length > 1 ? 's' : ''} urgente${urgent.length > 1 ? 's' : ''}. ${names}. Voulez-vous que je vous montre les détails?`);
-      }
-      return;
-    }
-
-    if (/\b(combien de relances|mes relances|relances)\b/.test(lower) && !/voir|toutes|liste/.test(lower)) {
-      const active = followUps.filter(f => !['positive', 'expired'].includes(f.status));
-      if (active.length === 0) {
-        reply(pick([
-          'Vous n\'avez aucune relance active pour le moment. Tout est à jour!',
-          'Aucune relance en cours! Votre suivi est impeccable.',
-        ]));
-      } else {
-        const byStatus: Record<string, number> = {};
-        active.forEach(f => { byStatus[f.status] = (byStatus[f.status] || 0) + 1; });
-        const statusLabels: Record<string, string> = { pending: 'en attente', sent: 'envoyées', no_reply: 'sans réponse', negative: 'négatives' };
-        const details = Object.entries(byStatus).map(([s, c]) => `${numToFr(c)} ${statusLabels[s] || s}`).join(', ');
-        reply(`Vous avez ${numToFr(active.length)} relance${active.length > 1 ? 's' : ''} active${active.length > 1 ? 's' : ''}. ${details}. Voulez-vous que je vous amène à la liste?`);
-      }
-      return;
-    }
-
-    if (/\b(qui dois-je relancer|qui relancer)\b/.test(lower)) {
-      const toFollow = followUps.filter(f => ['sent', 'pending', 'no_reply'].includes(f.status));
-      if (toFollow.length === 0) {
-        reply(pick([
-          'Personne à relancer pour le moment! Tout est à jour, bravo!',
-          'Aucun client à relancer. Votre suivi est au top!',
-        ]));
-      } else {
-        const names = toFollow.slice(0, 4).map(f => f.clientName).join(', ');
-        reply(`Vous devriez relancer ${numToFr(toFollow.length)} client${toFollow.length > 1 ? 's' : ''}. Notamment ${names}. Voulez-vous que je vous montre la liste complète?`);
-      }
-      return;
-    }
-
-    // ── Invoice queries ──
-    if (/\b(factures?\s*en\s*retard|impayé|impayés)\b/.test(lower)) {
-      const overdue = invoices.filter(i => i.status === 'overdue');
-      if (overdue.length === 0) {
-        reply(pick([
-          'Excellente nouvelle! Aucune facture en retard. Vos clients sont à jour!',
-          'Zéro facture en retard! Tout est en ordre de ce côté.',
-        ]));
-      } else {
-        const total = overdue.reduce((s, i) => s + i.amount, 0);
-        const names = overdue.slice(0, 3).map(i => i.clientName).join(', ');
-        reply(`Vous avez ${numToFr(overdue.length)} facture${overdue.length > 1 ? 's' : ''} en retard pour un total de ${formatMoney(total)}. ${pick(['Les clients concernés sont', 'Il s\'agit de'])} ${names}. Voulez-vous envoyer une relance?`);
-      }
-      return;
-    }
-
-    if (/\b(combien on me doit|argent|total dû|montant dû|combien me doit)\b/.test(lower)) {
-      const owed = invoices.filter(i => i.status === 'overdue' || i.status === 'pending');
-      const total = owed.reduce((s, i) => s + i.amount, 0);
-      if (total === 0) {
-        reply('Personne ne vous doit d\'argent en ce moment! Tout est réglé.');
-      } else {
-        reply(`On vous doit un total de ${formatMoney(total)} sur ${numToFr(owed.length)} facture${owed.length > 1 ? 's' : ''}. Voulez-vous voir le détail?`);
-      }
-      return;
-    }
-
-    // ── Prospect queries ──
-    if (/\b(nouveaux?\s*prospect|nouveau\s*prospect)\b/.test(lower)) {
-      const newP = prospects.filter(p => p.stage === 'nouveau');
-      if (newP.length === 0) {
-        reply('Pas de nouveau prospect pour le moment. On garde l\'oeil ouvert!');
-      } else {
-        const names = newP.slice(0, 3).map(p => p.name).join(', ');
-        reply(`Vous avez ${numToFr(newP.length)} nouveau${newP.length > 1 ? 'x' : ''} prospect${newP.length > 1 ? 's' : ''}! ${names}. Voulez-vous voir le pipeline?`);
-      }
-      return;
-    }
-
-    if (/\b(mes prospects|pipeline|prospect)\b/.test(lower) && !/montre|voir|ouvr/.test(lower)) {
-      const active = prospects.filter(p => !['gagne', 'perdu'].includes(p.stage));
-      if (active.length === 0) {
-        reply('Votre pipeline est vide pour le moment. C\'est le moment d\'aller chercher de nouveaux clients!');
-      } else {
-        const totalValue = active.reduce((s, p) => s + (p.estimatedValue || 0), 0);
-        const byStage: Record<string, number> = {};
-        active.forEach(p => { byStage[p.stage] = (byStage[p.stage] || 0) + 1; });
-        const stageLabels: Record<string, string> = { nouveau: 'nouveaux', contacte: 'contactés', qualifie: 'qualifiés', proposition: 'en proposition' };
-        const details = Object.entries(byStage).map(([s, c]) => `${numToFr(c)} ${stageLabels[s] || s}`).join(', ');
-        reply(`Votre pipeline compte ${numToFr(active.length)} prospect${active.length > 1 ? 's' : ''} actif${active.length > 1 ? 's' : ''}. ${details}. La valeur estimée totale est de ${formatMoney(totalValue)}. Souhaitez-vous voir les détails?`);
-      }
-      return;
-    }
-
-    // ── Appointment queries ──
-    if (/\b(rendez-vous aujourd|agenda|mon planning|planning)\b/.test(lower) && !/nouveau|calendrier/.test(lower)) {
-      const today = todayStr();
-      const todayAppts = appointments.filter(a => a.date === today);
-      if (todayAppts.length === 0) {
-        reply(pick([
-          'Aucun rendez-vous prévu aujourd\'hui! Votre journée est libre.',
-          'Journée libre aujourd\'hui, aucun rendez-vous au programme!',
-          'Rien au calendrier aujourd\'hui. Profitez-en!',
-        ]));
-      } else {
-        const list = todayAppts.slice(0, 3).map(a => `${a.time} avec ${a.clientName}`).join(', ');
-        reply(`Vous avez ${numToFr(todayAppts.length)} rendez-vous aujourd'hui. ${list}. Voulez-vous voir votre calendrier complet?`);
-      }
-      return;
-    }
-
-    if (/\b(prochain rendez-vous|prochain rdv|prochaine réunion)\b/.test(lower)) {
-      const now = new Date();
-      const upcoming = appointments
-        .filter(a => new Date(`${a.date}T${a.time}`) > now)
-        .sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
-      if (upcoming.length === 0) {
-        reply('Aucun rendez-vous à venir pour le moment.');
-      } else {
-        const next = upcoming[0];
-        const dayName = new Date(next.date + 'T00:00:00').toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
-        reply(`Votre prochain rendez-vous est ${dayName} à ${next.time} avec ${next.clientName}. Le sujet: ${next.subject}.`);
-      }
-      return;
-    }
-
-    // ── Calendar management: ADD appointment ──
-    if (/\b(ajoute|nouveau|créer?|planifi|prend|book|fixe|met)\b.*\b(rendez-vous|rdv|rencontre|meeting)\b/.test(lower) ||
-        /\b(rendez-vous|rdv)\b.*\b(avec)\b/.test(lower) && /\b(demain|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|après-demain|aujourd)\b/.test(lower)) {
-      
-      const nameMatch = lower.match(/avec\s+([a-zàâäéèêëïîôùûüÿç\-]+(?:\s+[a-zàâäéèêëïîôùûüÿç\-]+)?)/i);
-      const clientName = nameMatch ? nameMatch[1].split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '';
-      
-      let hour = 10, minute = 0;
-      const timeMatch = lower.match(/(\d{1,2})\s*[h:]\s*(\d{0,2})/);
-      if (timeMatch) {
-        hour = parseInt(timeMatch[1]);
-        minute = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-      } else if (/midi/.test(lower)) {
-        hour = 12;
-      } else if (/\b(matin)\b/.test(lower)) {
-        hour = 9;
-      } else if (/\b(après-midi|après midi)\b/.test(lower)) {
-        hour = 14;
-      }
-      
-      const today = new Date();
-      let targetDate = new Date(today);
-      
-      if (/demain/.test(lower)) {
-        targetDate.setDate(today.getDate() + 1);
-      } else if (/après-demain|après demain/.test(lower)) {
-        targetDate.setDate(today.getDate() + 2);
-      } else if (/aujourd/.test(lower)) {
-        // today
-      } else {
-        const dayNames: Record<string, number> = {
-          'lundi': 1, 'mardi': 2, 'mercredi': 3, 'jeudi': 4,
-          'vendredi': 5, 'samedi': 6, 'dimanche': 0,
+      if (onAddAppointment && nameMatch) {
+        const apt: Partial<Appointment> = {
+          clientName: nameMatch[1],
+          date: new Date().toISOString().split('T')[0],
+          time: timeMatch ? `${timeMatch[1].padStart(2,'0')}:${timeMatch[2] || '00'}` : '09:00',
+          subject: 'Rendez-vous',
+          duration: 60,
+          reminded: false,
         };
-        for (const [name, dayNum] of Object.entries(dayNames)) {
-          if (lower.includes(name)) {
-            const currentDay = today.getDay();
-            let daysAhead = dayNum - currentDay;
-            if (daysAhead <= 0) daysAhead += 7;
-            targetDate.setDate(today.getDate() + daysAhead);
+        
+        if (lower.includes('demain')) {
+          const d = new Date(); d.setDate(d.getDate() + 1);
+          apt.date = d.toISOString().split('T')[0];
+        }
+        const days: Record<string, number> = { lundi:1, mardi:2, mercredi:3, jeudi:4, vendredi:5, samedi:6, dimanche:0 };
+        for (const [day, num] of Object.entries(days)) {
+          if (lower.includes(day)) {
+            const d = new Date();
+            const diff = (num - d.getDay() + 7) % 7 || 7;
+            d.setDate(d.getDate() + diff);
+            apt.date = d.toISOString().split('T')[0];
             break;
           }
         }
-        const dateNumMatch = lower.match(/le\s+(\d{1,2})/);
-        if (dateNumMatch) {
-          const dayOfMonth = parseInt(dateNumMatch[1]);
-          targetDate.setDate(dayOfMonth);
-          if (targetDate < today) targetDate.setMonth(targetDate.getMonth() + 1);
+        
+        onAddAppointment(apt);
+        onNavigate?.('calendar' as Page);
+        const responses = [
+          `Parfait, j'ai ajouté votre rendez-vous avec ${nameMatch[1]}${timeMatch ? ` à ${timeMatch[1]}h${timeMatch[2]||'00'}` : ''}. Votre calendrier est à jour!`,
+          `C'est noté! RDV avec ${nameMatch[1]} bien enregistré. Je vous ai mis sur votre calendrier.`,
+          `Rendez-vous ajouté avec ${nameMatch[1]}! Tout est en ordre dans votre agenda.`,
+        ];
+        return { handled: true, response: responses[Math.floor(Math.random() * responses.length)] };
+      }
+    }
+
+    // Delete appointment
+    if ((lower.includes('supprimer') || lower.includes('annuler') || lower.includes('enlever')) && (lower.includes('rendez') || lower.includes('rdv'))) {
+      const nameMatch = text.match(/(?:avec|de)\s+(\w+)/i);
+      if (nameMatch && onDeleteAppointment) {
+        const apt = appointments.find(a => a.clientName.toLowerCase().includes(nameMatch[1].toLowerCase()));
+        if (apt) {
+          onDeleteAppointment(apt.id);
+          onNavigate?.('calendar' as Page);
+          return { handled: true, response: `Rendez-vous avec ${apt.clientName} supprimé. C'est réglé!` };
         }
+        return { handled: true, response: `Je n'ai pas trouvé de rendez-vous avec ${nameMatch[1]} dans votre agenda.` };
       }
-      
-      const dateStr = targetDate.toISOString().slice(0, 10);
-      const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-      
-      const subjectMatch = lower.match(/(?:pour|sujet|concernant|à propos)\s+(.+?)(?:\s+(?:à|demain|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|après)|$)/);
-      const subject = subjectMatch 
-        ? subjectMatch[1].charAt(0).toUpperCase() + subjectMatch[1].slice(1) 
-        : 'Rendez-vous';
-      
-      if (!clientName) {
-        reply(pick([
-          'Avec qui souhaitez-vous prendre rendez-vous? Dites-moi le nom!',
-          'Bien sûr! Dites-moi avec qui et je m\'occupe du reste.',
-          'Je veux bien vous aider! Avec qui est le rendez-vous?',
-        ]));
-        return;
+    }
+
+    // List appointments / planning
+    if (lower.includes('planning') || lower.includes('agenda') || lower.includes('mes rendez') || lower.includes('mon horaire')) {
+      onNavigate?.('calendar' as Page);
+      if (appointments.length === 0) {
+        const r = ["Votre agenda est vide pour l'instant. Un bon moment pour prospecter!", "Aucun rendez-vous à l'horizon. On en profite pour contacter des prospects?"];
+        return { handled: true, response: r[Math.floor(Math.random() * r.length)] };
       }
-      
-      let duration = 30;
-      const durationMatch = lower.match(/(\d+)\s*min/);
-      if (durationMatch) duration = parseInt(durationMatch[1]);
-      else if (/une heure|1\s*h(?![\d])/.test(lower)) duration = 60;
-      else if (/deux heures|2\s*h(?![\d])/.test(lower)) duration = 120;
-      
-      const locationMatch = lower.match(/(?:chez|au|à|lieu)\s+(.+?)(?:\s+(?:pour|à|demain)|$)/);
-      const location = locationMatch ? locationMatch[1] : undefined;
-      
-      const existingClient = [...followUps, ...invoices].find(
-        item => item.clientName.toLowerCase().includes(clientName.toLowerCase())
-      );
-      const clientEmail = existingClient ? existingClient.clientEmail : '';
-      
-      const formattedDate = targetDate.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
-      
-      onAddAppointment({
-        clientName,
-        clientEmail,
-        date: dateStr,
-        time: timeStr,
-        duration,
-        subject,
-        location,
+      const list = appointments.slice(0, 4).map(a => `${a.clientName} à ${a.time}`).join(', ');
+      return { handled: true, response: `Vous avez ${appointments.length} rendez-vous. Les prochains: ${list}.` };
+    }
+
+    // Invoices
+    if (lower.includes('facture') || lower.includes('paiement')) {
+      onNavigate?.('invoices' as Page);
+      const overdue = invoices.filter(i => i.status === 'overdue');
+      if (overdue.length > 0) {
+        const total = overdue.reduce((s, i) => s + i.amount, 0);
+        return { handled: true, response: `Vous avez ${overdue.length} facture${overdue.length > 1 ? 's' : ''} en retard pour un total de ${total}$. On s'en occupe?` };
+      }
+      return { handled: true, response: `Toutes vos factures sont à jour. Bravo, belle gestion!` };
+    }
+
+    // Prospects
+    if (lower.includes('prospect')) {
+      onNavigate?.('prospects' as Page);
+      return { handled: true, response: `Vous avez ${prospects.length} prospect${prospects.length > 1 ? 's' : ''} dans votre pipeline. Je vous montre la liste.` };
+    }
+
+    // Call contact
+    if (lower.includes('appeler') || lower.includes('appelle')) {
+      const nameMatch = text.match(/appel(?:er|le|ez)\s+(\w+)/i);
+      if (nameMatch) {
+        const name = nameMatch[1].toLowerCase();
+        const allContacts = [
+          ...appointments.map(a => ({ name: a.clientName, phone: a.clientPhone })),
+          ...prospects.map(p => ({ name: p.name, phone: p.phone })),
+        ];
+        const contact = allContacts.find(c => c.name.toLowerCase().includes(name));
+        if (contact?.phone) {
+          setTimeout(() => window.open(`tel:${contact.phone}`, '_self'), 1500);
+          return { handled: true, response: `J'appelle ${contact.name} au ${contact.phone}. Un instant.` };
+        }
+        return { handled: true, response: `Je n'ai pas de numéro pour ${nameMatch[1]}. Vérifiez dans vos contacts.` };
+      }
+    }
+
+    // Navigate
+    if (lower.includes('tableau de bord') || lower.includes('dashboard')) {
+      onNavigate?.('dashboard' as Page);
+      return { handled: true, response: `Voilà votre tableau de bord!` };
+    }
+    if (lower.includes('briefing') || lower.includes('brief du matin')) {
+      onNavigate?.('morning-brief' as Page);
+      return { handled: true, response: `Voici votre briefing du jour!` };
+    }
+
+    return { handled: false };
+  };
+
+  // Send to Gemini AI
+  const askGemini = async (userMessage: string): Promise<string> => {
+    const context = buildContext();
+
+    conversationHistoryRef.current.push({
+      role: 'user',
+      parts: [{ text: userMessage }]
+    });
+
+    // Keep last 16 messages for context
+    if (conversationHistoryRef.current.length > 16) {
+      conversationHistoryRef.current = conversationHistoryRef.current.slice(-16);
+    }
+
+    try {
+      const res = await fetch(GEMINI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            { role: 'user', parts: [{ text: SYSTEM_PROMPT + '\n\n' + context }] },
+            { role: 'model', parts: [{ text: "Compris, je suis Serena. Je vouvoie, je suis naturelle et chaleureuse." }] },
+            ...conversationHistoryRef.current
+          ],
+          generationConfig: {
+            temperature: 0.9,
+            maxOutputTokens: 200,
+            topP: 0.95,
+          }
+        })
       });
+
+      if (!res.ok) throw new Error(`API ${res.status}`);
+
+      const data = await res.json();
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
-      reply(pick([
-        `C'est noté! Rendez-vous avec ${clientName} le ${formattedDate} à ${timeStr}. Je vous montre le calendrier!`,
-        `Parfait! J'ai ajouté votre rendez-vous avec ${clientName}, ${formattedDate} à ${timeStr}. C'est fait!`,
-        `Rendez-vous confirmé avec ${clientName}! ${formattedDate} à ${timeStr}. Je vous ouvre le calendrier.`,
-      ]), 'calendar', 2000);
-      return;
+      if (!aiText) throw new Error('No response');
+
+      // Clean up any markdown formatting for speech
+      const cleaned = aiText.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#/g, '').trim();
+
+      conversationHistoryRef.current.push({
+        role: 'model',
+        parts: [{ text: cleaned }]
+      });
+
+      return cleaned;
+    } catch (error) {
+      console.error('Gemini error:', error);
+      const fallbacks = [
+        "Désolée, j'ai eu un petit souci de connexion. Pouvez-vous réessayer?",
+        "Hmm, ma connexion a flanché. Réessayez dans un instant!",
+        "Petit problème technique de mon côté. Redemandez-moi, je suis prête!",
+      ];
+      return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    }
+  };
+
+  const processUserInput = async (text: string) => {
+    if (!text.trim()) return;
+
+    setConversation(prev => [...prev, { role: 'user', text }]);
+    setIsThinking(true);
+
+    const actionResult = checkForActions(text);
+    let response: string;
+
+    if (actionResult.handled) {
+      response = actionResult.response!;
+    } else {
+      response = await askGemini(text);
     }
 
-    // ── Calendar management: DELETE appointment ──
-    if (/\b(supprime|annule|enlève|retire|cancel)\b.*\b(rendez-vous|rdv|rencontre|meeting)\b/.test(lower)) {
-      const nameMatch = lower.match(/(?:avec|de)\s+([a-zàâäéèêëïîôùûüÿç\-]+(?:\s+[a-zàâäéèêëïîôùûüÿç\-]+)?)/i);
-      
-      if (nameMatch) {
-        const searchName = nameMatch[1].toLowerCase();
-        const found = appointments.find(a => a.clientName.toLowerCase().includes(searchName));
-        
-        if (found) {
-          onDeleteAppointment(found.id);
-          const dayName = new Date(found.date + 'T00:00:00').toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
-          reply(pick([
-            `C'est fait! Le rendez-vous avec ${found.clientName} du ${dayName} à ${found.time} est supprimé.`,
-            `Rendez-vous avec ${found.clientName} annulé! ${dayName} à ${found.time}, c'est retiré de votre calendrier.`,
-          ]), 'calendar', 2000);
-        } else {
-          reply(`Je n'ai pas trouvé de rendez-vous avec ${nameMatch[1]}. Voulez-vous que je vous montre le calendrier pour vérifier?`);
-        }
-      } else {
-        const now = new Date();
-        const upcoming = appointments
-          .filter(a => new Date(`${a.date}T${a.time}`) > now)
-          .sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
-        
-        if (upcoming.length > 0) {
-          const next = upcoming[0];
-          onDeleteAppointment(next.id);
-          reply(`Le prochain rendez-vous avec ${next.clientName} a été annulé.`);
-        } else {
-          reply('Aucun rendez-vous à venir à supprimer.');
-        }
-      }
-      return;
-    }
+    setIsThinking(false);
+    setConversation(prev => [...prev, { role: 'serena', text: response }]);
+    speak(response);
+  };
 
-    // ── Calendar management: MOVE/MODIFY appointment ──
-    if (/\b(déplace|reporte|change|modifie|bouge|repousse|avance)\b.*\b(rendez-vous|rdv|rencontre|meeting)\b/.test(lower)) {
-      const nameMatch = lower.match(/(?:avec|de)\s+([a-zàâäéèêëïîôùûüÿç\-]+(?:\s+[a-zàâäéèêëïîôùûüÿç\-]+)?)/i);
-      
-      if (nameMatch) {
-        const searchName = nameMatch[1].toLowerCase();
-        const found = appointments.find(a => a.clientName.toLowerCase().includes(searchName));
-        
-        if (found) {
-          let newDate = new Date();
-          const today = new Date();
-          
-          if (/demain/.test(lower)) {
-            newDate.setDate(today.getDate() + 1);
-          } else if (/après-demain|après demain/.test(lower)) {
-            newDate.setDate(today.getDate() + 2);
-          } else {
-            const dayNames: Record<string, number> = {
-              'lundi': 1, 'mardi': 2, 'mercredi': 3, 'jeudi': 4,
-              'vendredi': 5, 'samedi': 6, 'dimanche': 0,
-            };
-            for (const [name, dayNum] of Object.entries(dayNames)) {
-              if (lower.includes(name)) {
-                const currentDay = today.getDay();
-                let daysAhead = dayNum - currentDay;
-                if (daysAhead <= 0) daysAhead += 7;
-                newDate.setDate(today.getDate() + daysAhead);
-                break;
-              }
-            }
-          }
-          
-          let hour = parseInt(found.time.split(':')[0]);
-          let minute = parseInt(found.time.split(':')[1]);
-          const timeMatch = lower.match(/(\d{1,2})\s*[h:]\s*(\d{0,2})/);
-          if (timeMatch) {
-            hour = parseInt(timeMatch[1]);
-            minute = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-          }
-          
-          const newDateStr = newDate.toISOString().slice(0, 10);
-          const newTimeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-          const formattedNewDate = newDate.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
-          
-          onDeleteAppointment(found.id);
-          onAddAppointment({
-            clientName: found.clientName,
-            clientEmail: found.clientEmail,
-            date: newDateStr,
-            time: newTimeStr,
-            duration: found.duration,
-            subject: found.subject,
-            location: found.location,
-            notes: found.notes,
-          });
-          
-          reply(pick([
-            `C'est fait! Le rendez-vous avec ${found.clientName} est maintenant le ${formattedNewDate} à ${newTimeStr}.`,
-            `Parfait, j'ai déplacé votre rendez-vous avec ${found.clientName} au ${formattedNewDate} à ${newTimeStr}!`,
-          ]), 'calendar', 2000);
-        } else {
-          reply(`Je n'ai pas trouvé de rendez-vous avec ${nameMatch[1]}. Voulez-vous vérifier dans le calendrier?`);
-        }
-      } else {
-        reply('Avec qui est le rendez-vous que vous souhaitez déplacer? Dites-moi le nom!');
-      }
-      return;
-    }
-
-    // ── Calendar: what's coming up / this week ──
-    if (/\b(cette semaine|semaine|prochains jours|jours à venir)\b/.test(lower) && /\b(rendez-vous|rdv|agenda|planning|quoi)\b/.test(lower)) {
-      const today = new Date();
-      const weekEnd = new Date(today);
-      weekEnd.setDate(today.getDate() + 7);
-      const todayS = today.toISOString().slice(0, 10);
-      const weekEndS = weekEnd.toISOString().slice(0, 10);
-      
-      const thisWeek = appointments
-        .filter(a => a.date >= todayS && a.date <= weekEndS)
-        .sort((a, b) => a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date));
-      
-      if (thisWeek.length === 0) {
-        reply(pick([
-          'Aucun rendez-vous cette semaine! Votre agenda est complètement libre.',
-          'Semaine tranquille! Rien au calendrier pour les prochains jours.',
-        ]));
-      } else {
-        const list = thisWeek.slice(0, 5).map(a => {
-          const dayName = new Date(a.date + 'T00:00:00').toLocaleDateString('fr-CA', { weekday: 'long' });
-          return `${dayName} à ${a.time} avec ${a.clientName}`;
-        }).join('. ');
-        reply(`Vous avez ${numToFr(thisWeek.length)} rendez-vous cette semaine. ${list}. Souhaitez-vous modifier quelque chose?`);
-      }
-      return;
-    }
-
-    // ── Action: appeler un contact ──
-    if (/\b(appelle|appeler|téléphone|phone|call|numéro)\b/.test(lower)) {
-      const nameMatch = lower.match(/(?:appelle|appeler|téléphone|phone|call|numéro)\s*(?:à|de|du|le|la)?\s*(.+)/);
-      if (nameMatch) {
-        const searchName = nameMatch[1].trim().replace(/^(le|la|du|de)\s+/, '');
-        const fu = followUps.find(f => f.clientName.toLowerCase().includes(searchName));
-        const inv = invoices.find(i => i.clientName.toLowerCase().includes(searchName));
-        const prsp = prospects.find(p => p.name.toLowerCase().includes(searchName));
-        const appt = appointments.find(a => a.clientName.toLowerCase().includes(searchName));
-        
-        const contactName = fu?.clientName || inv?.clientName || prsp?.name || appt?.clientName;
-        const contactPhone = fu?.clientPhone || inv?.clientPhone || prsp?.phone || appt?.clientPhone;
-        
-        if (contactName && contactPhone) {
-          reply(`${contactName}! Son numéro est le ${contactPhone}. Je lance l'appel pour vous!`);
-          setTimeout(() => { window.open(`tel:${contactPhone.replace(/[^+\d]/g, '')}`, '_self'); }, 2500);
-        } else if (contactName) {
-          reply(`J'ai trouvé ${contactName} dans vos contacts, mais je n'ai pas son numéro de téléphone malheureusement.`);
-        } else {
-          reply(`Je n'ai pas trouvé de contact du nom de "${searchName}" dans votre répertoire.`);
-        }
-        return;
-      }
-    }
-
-    // ── Action: numéro d'un contact ──
-    if (/\b(quel est le numéro|numéro de|coordonnées|contact de)\b/.test(lower)) {
-      const nameMatch = lower.match(/(?:numéro de|contact de|coordonnées de|quel est le numéro de)\s*(.+)/);
-      if (nameMatch) {
-        const searchName = nameMatch[1].trim().replace(/^(le|la|du|de)\s+/, '');
-        const fu = followUps.find(f => f.clientName.toLowerCase().includes(searchName));
-        const inv = invoices.find(i => i.clientName.toLowerCase().includes(searchName));
-        const prsp = prospects.find(p => p.name.toLowerCase().includes(searchName));
-        const appt = appointments.find(a => a.clientName.toLowerCase().includes(searchName));
-        
-        const contactName = fu?.clientName || inv?.clientName || prsp?.name || appt?.clientName;
-        const contactPhone = fu?.clientPhone || inv?.clientPhone || prsp?.phone || appt?.clientPhone;
-        const contactEmail = fu?.clientEmail || inv?.clientEmail || prsp?.email || appt?.clientEmail;
-        
-        if (contactName) {
-          let info = `${contactName}. `;
-          if (contactPhone) info += `Son téléphone: ${contactPhone}. `;
-          if (contactEmail) info += `Son email: ${contactEmail}. `;
-          if (!contactPhone && !contactEmail) info += `Je n'ai aucune coordonnée pour cette personne.`;
-          if (contactPhone) info += `Voulez-vous que je l'appelle?`;
-          reply(info);
-        } else {
-          reply(`Je n'ai pas trouvé de contact du nom de "${searchName}".`);
-        }
-        return;
-      }
-    }
-
-    // ── Action: relance client ──
-    if (/\b(relance\s+\w+)\b/.test(lower)) {
-      const match = lower.match(/relance\s+(.+)/);
-      if (match) {
-        const name = match[1].trim();
-        const fu = followUps.find(f => f.clientName.toLowerCase().includes(name));
-        if (fu) {
-          reply(`Relance pour ${fu.clientName}, sujet: ${fu.subject}. Je vous amène au briefing pour gérer ça!`, 'morning-brief', 1200);
-        } else {
-          reply(`Je n'ai pas trouvé de client nommé "${name}" dans vos relances. Voulez-vous vérifier la liste?`);
-        }
-        return;
-      }
-    }
-
-    // ── Navigation commands ──
-    for (const cmd of NAV_COMMANDS) {
-      if (cmd.keywords.some(kw => lower.includes(kw))) {
-        reply(pick(cmd.responses), cmd.page);
-        return;
-      }
-    }
-
-    // ── Smart fallback ──
-    // Try to understand partial intent
-    if (/\b(combien|nombre|total)\b/.test(lower)) {
-      reply('Vous voulez savoir combien de quoi exactement? Je peux vous dire le nombre de relances, factures, prospects ou rendez-vous.');
-      return;
-    }
-
-    if (/\b(montre|affiche|voir|ouvr)\b/.test(lower)) {
-      reply('Que souhaitez-vous voir? Votre calendrier, vos factures, vos relances ou vos prospects?');
-      return;
-    }
-
-    if (/\b(quand|quelle heure|à quelle)\b/.test(lower)) {
-      reply('Vous cherchez une information sur un rendez-vous? Dites-moi "mon planning" ou "prochain rendez-vous" pour que je vérifie!');
-      return;
-    }
-
-    reply(pick([
-      'Hmm, je n\'ai pas bien saisi. Essayez de me dire ce que vous cherchez, comme "mon résumé", "mes factures" ou "ajoute un rendez-vous"!',
-      'Pardon, je n\'ai pas compris. Vous pouvez me demander un résumé, consulter vos relances, vos factures ou votre planning!',
-      'Désolée, je n\'ai pas capté! Essayez quelque chose comme "résumé", "factures en retard" ou "prochain rendez-vous".',
-      'Je n\'ai pas bien entendu. Dites-moi par exemple "bonjour" pour commencer, ou demandez-moi directement ce dont vous avez besoin!',
-    ]));
-  }, [followUps, invoices, prospects, appointments, onNavigate, onAddAppointment, onDeleteAppointment, speak]);
-
-  /* ── Start listening ────────────────────────────────── */
-  const startListeningInner = useCallback(() => {
+  const startListening = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return;
-
-    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    if (!SR) {
+      setConversation(prev => [...prev, { role: 'serena', text: "La reconnaissance vocale n'est pas disponible. Utilisez Chrome sur Android." }]);
+      return;
+    }
 
     const recognition = new SR();
-    recognitionRef.current = recognition;
-    recognition.lang = 'fr-FR';
+    recognition.lang = 'fr-CA';
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => {
-      setListening(true);
-      setShowBubble(true);
-      setTranscript('');
-      setResponse("Je vous écoute...");
-    };
-
     recognition.onresult = (event: any) => {
-      let interim = '';
-      let final = '';
+      let finalT = '';
+      let interimT = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const r = event.results[i];
-        if (r.isFinal) final += r[0].transcript;
-        else interim += r[0].transcript;
+        if (event.results[i].isFinal) {
+          finalT += event.results[i][0].transcript;
+        } else {
+          interimT += event.results[i][0].transcript;
+        }
       }
-      setTranscript(final || interim);
-      if (final) processCommand(final);
-    };
-
-    recognition.onerror = (event: any) => {
-      setListening(false);
-      if (event.error === 'not-allowed') {
-        setResponse('Microphone non autorisé. Veuillez permettre l\'accès au micro dans vos paramètres.');
-        speak('Veuillez autoriser l\'accès au microphone dans vos paramètres.');
-      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        setResponse(pick(['Oups, petite erreur! Réessayez.', 'Je n\'ai rien capté. Essayez encore!']));
+      setTranscript(interimT || finalT);
+      if (finalT) {
+        setTranscript('');
+        processUserInput(finalT);
       }
     };
 
     recognition.onend = () => {
-      setListening(false);
+      setIsListening(false);
+      if (isHandsFreeRef.current && !isSpeakingRef.current) {
+        setTimeout(() => startListening(), 600);
+      }
     };
 
-    try {
-      recognition.start();
-    } catch {
-      setListening(false);
-      setResponse('Impossible de démarrer le micro. Vérifiez vos permissions.');
-    }
-  }, [processCommand, speak]);
+    recognition.onerror = (event: any) => {
+      setIsListening(false);
+      if (event.error === 'no-speech' && isHandsFreeRef.current) {
+        setTimeout(() => startListening(), 800);
+      }
+    };
 
-  const startListening = useCallback(() => {
-    startListeningInner();
-  }, [startListeningInner]);
-
-  const stopListening = useCallback(() => {
-    if (recognitionRef.current) recognitionRef.current.stop();
-    setListening(false);
-    if (handsFreeRef.current) {
-      setHandsFree(false);
-      handsFreeRef.current = false;
-    }
+    recognitionRef.current = recognition;
+    try { recognition.start(); setIsListening(true); } catch(e) {}
   }, []);
 
-  const toggleHandsFree = useCallback(() => {
-    setHandsFree(prev => {
-      const next = !prev;
-      handsFreeRef.current = next;
-      if (next && !listening) {
-        startListeningInner();
-      }
-      return next;
-    });
-  }, [listening, startListeningInner]);
+  const stopListening = useCallback(() => {
+    try { recognitionRef.current?.stop(); } catch(e) {}
+    setIsListening(false);
+  }, []);
 
-  if (!supported) return null;
+  const toggleMic = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      startListening();
+    }
+  };
 
-  /* ── Full-page Serena view ───────────────────────────── */
-  if (fullPage) {
-    return (
-      <div style={{
-        minHeight: 'calc(100vh - 200px)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px 20px',
-        gap: 24,
-      }}>
-        {/* Avatar */}
-        <div style={{
-          width: 120,
-          height: 120,
-          borderRadius: '50%',
-          background: listening
-            ? 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)'
-            : 'linear-gradient(135deg, #06b6d4 0%, #0ea5e9 60%, #38bdf8 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: listening
-            ? '0 0 60px rgba(239,68,68,0.4), 0 0 120px rgba(239,68,68,0.15)'
-            : '0 0 60px rgba(6,182,212,0.35), 0 0 120px rgba(56,189,248,0.1)',
-          animation: listening ? 'pulse-ring 1.5s infinite' : speaking ? 'handsfree-ring 2s infinite' : 'none',
-          transition: 'all 0.4s ease',
-        }}>
-          <span style={{
-            fontSize: '2.8rem',
-            fontWeight: 700,
-            color: 'white',
-            letterSpacing: 2,
-            textShadow: '0 2px 12px rgba(0,0,0,0.3)',
-          }}>S</span>
-        </div>
+  const toggleHandsFree = () => {
+    if (isHandsFree) {
+      setIsHandsFree(false);
+      isHandsFreeRef.current = false;
+      stopListening();
+      clearTimeout(handsFreeTimeoutRef.current);
+      const msg = "Mode mains-libres désactivé.";
+      setConversation(prev => [...prev, { role: 'serena', text: msg }]);
+    } else {
+      setIsHandsFree(true);
+      isHandsFreeRef.current = true;
+      const msg = "Mode mains-libres activé! Je vous écoute en continu. Parfait pour la route.";
+      setConversation(prev => [...prev, { role: 'serena', text: msg }]);
+      speak(msg);
+    }
+  };
 
-        {/* Name + Status */}
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={{
-            fontSize: '1.6rem',
-            fontWeight: 700,
-            color: '#e8edf5',
-            margin: 0,
-            letterSpacing: 1,
-          }}>Serena</h2>
-          <p style={{
-            fontSize: '0.85rem',
-            color: listening ? '#ef4444' : speaking ? '#06b6d4' : '#8a96a8',
-            margin: '6px 0 0',
-            fontWeight: 600,
-            letterSpacing: 1.5,
-            textTransform: 'uppercase',
-          }}>
-            {listening ? 'Je vous écoute...' : speaking ? 'Je vous réponds...' : 'Votre assistante vocale'}
-          </p>
-        </div>
+  useEffect(() => {
+    return () => {
+      try { recognitionRef.current?.stop(); } catch(e) {}
+      window.speechSynthesis.cancel();
+      clearTimeout(handsFreeTimeoutRef.current);
+    };
+  }, []);
 
-        {/* Sound wave when speaking */}
-        {speaking && (
-          <div style={{ display: 'flex', gap: 4, alignItems: 'center', height: 32 }}>
-            {[0, 1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} style={{
-                width: 4,
-                borderRadius: 2,
-                background: 'linear-gradient(to top, #06b6d4, #38bdf8)',
-                animation: `wave-bar 0.8s ease-in-out ${i * 0.08}s infinite alternate`,
-              }} />
-            ))}
-          </div>
-        )}
-
-        {/* Transcript */}
-        {transcript && (
-          <div style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(56,189,248,0.15)',
-            borderRadius: 12,
-            padding: '12px 20px',
-            maxWidth: 400,
-            width: '100%',
-            textAlign: 'center',
-          }}>
-            <span style={{ color: '#8a96a8', fontSize: '0.75rem', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase' }}>
-              Vous avez dit
-            </span>
-            <p style={{ color: '#b8c4d0', fontSize: '0.95rem', fontStyle: 'italic', margin: '6px 0 0' }}>
-              &quot;{transcript}&quot;
-            </p>
-          </div>
-        )}
-
-        {/* Response */}
-        {response && (
-          <div style={{
-            background: 'rgba(6,182,212,0.06)',
-            border: '1px solid rgba(6,182,212,0.2)',
-            borderRadius: 12,
-            padding: '14px 20px',
-            maxWidth: 400,
-            width: '100%',
-            textAlign: 'center',
-          }}>
-            <span style={{ color: '#06b6d4', fontSize: '0.75rem', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase' }}>
-              Serena
-            </span>
-            <p style={{ color: '#e8edf5', fontSize: '0.95rem', margin: '6px 0 0', lineHeight: 1.5 }}>
-              {response}
-            </p>
-          </div>
-        )}
-
-        {/* Large mic button */}
-        <button
-          onClick={listening ? stopListening : startListening}
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: '50%',
-            background: listening
-              ? 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)'
-              : 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)',
-            border: listening
-              ? '3px solid rgba(239,68,68,0.7)'
-              : '3px solid rgba(56,189,248,0.6)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: listening
-              ? '0 0 40px rgba(239,68,68,0.4)'
-              : '0 4px 30px rgba(56,189,248,0.4)',
-            transition: 'all 0.3s ease',
-            animation: listening ? 'pulse-ring 1.5s infinite' : 'none',
-            marginTop: 8,
-          }}
-        >
-          {listening ? <MicOff size={32} color="white" /> : <Mic size={32} color="white" />}
-        </button>
-
-        <span style={{
-          fontSize: '0.8rem',
-          color: listening ? '#ef4444' : '#8a96a8',
-          fontWeight: 600,
-          letterSpacing: 1,
-        }}>
-          {listening ? 'Appuyez pour arrêter' : 'Appuyez pour parler'}
-        </span>
-
-        {/* Hands-free toggle */}
-        <button
-          onClick={toggleHandsFree}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: handsFree ? 'rgba(6,182,212,0.12)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${handsFree ? 'rgba(6,182,212,0.35)' : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: 10,
-            padding: '10px 20px',
-            cursor: 'pointer',
-            color: handsFree ? '#06b6d4' : '#8a96a8',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            transition: 'all 0.2s',
-          }}
-        >
-          <Headphones size={18} />
-          Mode mains-libres {handsFree ? 'ON' : 'OFF'}
-        </button>
-
-        {/* Quick commands hint */}
-        <div style={{
-          marginTop: 8,
-          padding: '16px 20px',
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: 12,
-          maxWidth: 400,
-          width: '100%',
-        }}>
-          <p style={{ color: '#8a96a8', fontSize: '0.75rem', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', margin: '0 0 10px', textAlign: 'center' }}>
-            Essayez de dire...
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {[
-              '"Bonjour Serena!"',
-              '"Donne-moi mon résumé"',
-              '"Ajoute un rendez-vous demain à 14h avec..."',
-              '"Quelles sont mes factures en retard?"',
-              '"Appelle [nom du contact]"',
-            ].map((cmd, i) => (
-              <p key={i} style={{ color: '#b8c4d0', fontSize: '0.8rem', margin: 0, paddingLeft: 12, borderLeft: '2px solid rgba(6,182,212,0.2)' }}>
-                {cmd}
-              </p>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Load voices
+  useEffect(() => {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }, []);
 
   return (
-    <>
-      {/* Bubble */}
-      {showBubble && (
-        <div style={{
-          position: 'fixed',
-          bottom: 90,
-          right: 20,
-          maxWidth: 340,
-          background: 'rgba(4,5,10,0.97)',
-          border: `1px solid ${listening ? 'rgba(239,68,68,0.4)' : 'rgba(56,189,248,0.35)'}`,
-          borderRadius: 16,
-          padding: '14px 18px 14px 14px',
-          backdropFilter: 'blur(24px)',
-          zIndex: 9999,
-          boxShadow: listening
-            ? '0 0 30px rgba(239,68,68,0.2)'
-            : '0 0 30px rgba(56,189,248,0.15)',
-          transition: 'border-color 0.3s',
-        }}>
-          <button
-            onClick={() => setShowBubble(false)}
-            style={{
-              position: 'absolute', top: 8, right: 8,
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'rgba(232,237,245,0.4)', padding: 2, lineHeight: 1,
-            }}
-          >
-            <X size={12} />
-          </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <div style={{
-              width: 24, height: 24, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #06b6d4, #0ea5e9)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.7rem', fontWeight: 700, color: 'white',
-              boxShadow: '0 0 8px rgba(6,182,212,0.4)',
-              flexShrink: 0,
-            }}>S</div>
-
-            <div style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: listening ? '#ef4444' : speaking ? '#06b6d4' : '#38bdf8',
-              boxShadow: listening ? '0 0 8px #ef4444' : '0 0 8px #38bdf8',
-              animation: listening ? 'blink-dot 1s infinite' : speaking ? 'speaking-wave 0.6s infinite' : 'none',
-              flexShrink: 0,
-            }} />
-            <span style={{
-              fontSize: '0.7rem',
-              color: 'rgba(232,237,245,0.5)',
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              textShadow: '0 0 12px rgba(6,182,212,0.3)',
-            }}>
-              {listening ? 'Je vous écoute...' : speaking ? 'Serena répond...' : 'Serena'}
-            </span>
-          </div>
-
-          {speaking && (
-            <div style={{ display: 'flex', gap: 2, marginBottom: 8, alignItems: 'center', height: 16 }}>
-              {[0, 1, 2, 3, 4].map(i => (
-                <div key={i} style={{
-                  width: 3, borderRadius: 2,
-                  background: 'rgba(6,182,212,0.6)',
-                  animation: `wave-bar 0.8s ease-in-out ${i * 0.1}s infinite alternate`,
-                }} />
-              ))}
-            </div>
-          )}
-
-          {transcript && (
-            <div style={{
-              color: 'rgba(232,237,245,0.65)',
-              fontSize: '0.78rem',
-              marginBottom: 8,
-              fontStyle: 'italic',
-              lineHeight: 1.4,
-            }}>
-              &quot;{transcript}&quot;
-            </div>
-          )}
-
-          <div style={{
-            color: '#e8edf5',
-            fontSize: '0.85rem',
-            lineHeight: 1.5,
-            fontWeight: 500,
-          }}>
-            {response || 'Serena — Votre assistante vocale'}
-          </div>
-
-          <button
-            onClick={toggleHandsFree}
-            style={{
-              marginTop: 10,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              background: handsFree ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${handsFree ? 'rgba(6,182,212,0.4)' : 'rgba(255,255,255,0.1)'}`,
-              borderRadius: 8,
-              padding: '6px 10px',
-              cursor: 'pointer',
-              color: handsFree ? '#06b6d4' : 'rgba(232,237,245,0.5)',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              transition: 'all 0.2s',
-              width: '100%',
-              justifyContent: 'center',
-            }}
-          >
-            <Headphones size={14} />
-            Mode mains-libres {handsFree ? 'ON' : 'OFF'}
-          </button>
-        </div>
-      )}
-
-      {/* Floating mic button */}
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(180deg, #0a0e1a 0%, #0d1528 50%, #0a1020 100%)',
+      color: '#fff',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: '20px 16px',
+      paddingBottom: '120px',
+    }}>
+      {/* Avatar */}
       <div style={{
-        position: 'fixed',
-        bottom: 30,
-        right: 16,
-        zIndex: 10000,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 6,
+        width: 90, height: 90, borderRadius: '50%',
+        background: isSpeaking
+          ? 'linear-gradient(135deg, #00D4FF, #50C878, #00D4FF)'
+          : isThinking ? 'linear-gradient(135deg, #FFD700, #00D4FF)'
+          : 'linear-gradient(135deg, #00D4FF, #0088AA)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        marginTop: 16, marginBottom: 8,
+        boxShadow: isSpeaking
+          ? '0 0 40px rgba(0,212,255,0.5), 0 0 80px rgba(80,200,120,0.2)'
+          : isThinking ? '0 0 30px rgba(255,215,0,0.3)'
+          : '0 0 20px rgba(0,212,255,0.2)',
+        animation: isSpeaking ? 'serena-pulse 1.5s ease-in-out infinite' : isThinking ? 'serena-pulse 0.8s ease-in-out infinite' : 'none',
+        transition: 'all 0.3s ease',
       }}>
-        <span style={{
-          fontSize: '0.65rem',
-          color: listening ? '#ef4444' : '#38bdf8',
-          letterSpacing: 1,
-          textTransform: 'uppercase',
-          fontWeight: 700,
-          textShadow: '0 1px 6px rgba(0,0,0,0.8)',
-        }}>
-          {listening ? 'Stop' : 'Serena'}
-        </span>
-        <button
-          onClick={listening ? stopListening : startListening}
-          title={listening ? 'Arrêter l\'écoute' : 'Parler à Serena'}
-          style={{
-            width: 64,
-            height: 64,
-            borderRadius: '50%',
-            background: listening
-              ? 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)'
-              : 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)',
-            border: listening
-              ? '3px solid rgba(239,68,68,0.7)'
-              : '3px solid rgba(56,189,248,0.6)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: listening
-              ? '0 0 0 0 rgba(239,68,68,0.4), 0 0 24px rgba(239,68,68,0.3)'
-              : handsFree
-                ? '0 0 0 0 rgba(6,182,212,0.5), 0 4px 24px rgba(56,189,248,0.4)'
-                : '0 4px 24px rgba(56,189,248,0.4), 0 0 16px rgba(56,189,248,0.2)',
-            transition: 'all 0.3s ease',
-            animation: listening
-              ? 'pulse-ring 1.5s infinite'
-              : handsFree
-                ? 'handsfree-ring 2s infinite'
-                : 'none',
-          }}
-        >
-          {listening
-            ? <MicOff size={26} color="white" />
-            : <Mic size={26} color="white" />
-          }
-        </button>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        </svg>
+      </div>
+
+      <h2 style={{
+        fontSize: '1.3rem', fontWeight: 700, marginBottom: 2,
+        background: 'linear-gradient(90deg, #00D4FF, #50C878)',
+        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+      }}>Serena</h2>
+      <p style={{ color: '#8a96a8', fontSize: '0.82rem', marginBottom: 16, height: 18 }}>
+        {isThinking ? 'Réflexion...' : isSpeaking ? 'Parle...' : isListening ? 'Je vous écoute...' : 'Assistante IA'}
+      </p>
+
+      {/* Conversation */}
+      <div style={{
+        width: '100%', maxWidth: 500, flex: 1, overflowY: 'auto',
+        marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 10,
+        WebkitOverflowScrolling: 'touch',
+      }}>
+        {conversation.map((msg, i) => (
+          <div key={i} style={{
+            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+            maxWidth: '85%',
+            padding: '10px 14px',
+            borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+            background: msg.role === 'user'
+              ? 'rgba(0,212,255,0.12)' : 'rgba(255,255,255,0.06)',
+            border: msg.role === 'user'
+              ? '1px solid rgba(0,212,255,0.25)' : '1px solid rgba(255,255,255,0.08)',
+            color: msg.role === 'user' ? '#d0eaff' : '#b8c4d0',
+            fontSize: '0.9rem', lineHeight: 1.5,
+          }}>
+            {msg.text}
+          </div>
+        ))}
+        {transcript && (
+          <div style={{
+            alignSelf: 'flex-end', maxWidth: '85%',
+            padding: '10px 14px', borderRadius: '16px 16px 4px 16px',
+            background: 'rgba(0,212,255,0.06)',
+            border: '1px dashed rgba(0,212,255,0.25)',
+            color: '#6a7a8a', fontSize: '0.9rem', fontStyle: 'italic',
+          }}>
+            {transcript}...
+          </div>
+        )}
+        {isThinking && (
+          <div style={{
+            alignSelf: 'flex-start', padding: '10px 14px',
+            borderRadius: '16px 16px 16px 4px',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#8a96a8', fontSize: '1rem', letterSpacing: 3,
+          }}>
+            <span className="serena-dot" style={{animationDelay:'0s'}}>●</span>
+            <span className="serena-dot" style={{animationDelay:'0.2s'}}>●</span>
+            <span className="serena-dot" style={{animationDelay:'0.4s'}}>●</span>
+          </div>
+        )}
+        <div ref={conversationEndRef} />
+      </div>
+
+      {/* Hands-free toggle */}
+      <button onClick={toggleHandsFree} style={{
+        padding: '8px 22px', borderRadius: 30,
+        border: isHandsFree ? '1px solid #50C878' : '1px solid rgba(255,255,255,0.12)',
+        background: isHandsFree ? 'rgba(80,200,120,0.12)' : 'rgba(255,255,255,0.05)',
+        color: isHandsFree ? '#50C878' : '#8a96a8',
+        fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', marginBottom: 14,
+      }}>
+        {isHandsFree ? '● Mains-libres actif' : 'Activer mains-libres'}
+      </button>
+
+      {/* Mic button */}
+      <button onClick={toggleMic} style={{
+        width: 68, height: 68, borderRadius: '50%', border: 'none',
+        background: isListening
+          ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+          : 'linear-gradient(135deg, #00D4FF, #0088CC)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer',
+        boxShadow: isListening
+          ? '0 0 25px rgba(239,68,68,0.4)' : '0 0 25px rgba(0,212,255,0.3)',
+      }}>
+        {isListening ? (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.12 1.5-.35 2.18"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        ) : (
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        )}
+      </button>
+      <p style={{ color: '#6a7a8a', fontSize: '0.72rem', marginTop: 6 }}>
+        {isListening ? 'Appuyez pour arrêter' : 'Appuyez pour parler'}
+      </p>
+
+      {/* Quick commands */}
+      <div style={{
+        width: '100%', maxWidth: 500, marginTop: 20,
+        padding: '14px', borderRadius: 14,
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <p style={{ color: '#6a7a8a', fontSize: '0.75rem', fontWeight: 600, marginBottom: 8 }}>
+          Essayez:
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {[
+            'Mon planning du jour',
+            'Mes factures en retard',
+            'Donne-moi un conseil business',
+            'Comment ça va Serena?',
+            'Aide-moi à prospecter',
+          ].map(cmd => (
+            <button key={cmd} onClick={() => processUserInput(cmd)} style={{
+              padding: '5px 11px', borderRadius: 18,
+              border: '1px solid rgba(0,212,255,0.15)',
+              background: 'rgba(0,212,255,0.06)',
+              color: '#8a96a8', fontSize: '0.75rem', cursor: 'pointer',
+            }}>
+              {cmd}
+            </button>
+          ))}
+        </div>
       </div>
 
       <style>{`
-        @keyframes pulse-ring {
-          0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
-          70% { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
-          100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        @keyframes serena-pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.06); }
         }
-        @keyframes handsfree-ring {
-          0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); }
-          50% { box-shadow: 0 0 0 12px rgba(6,182,212,0); }
-          100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); }
+        .serena-dot {
+          display: inline-block;
+          animation: serena-blink 1s infinite;
         }
-        @keyframes blink-dot {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-        @keyframes speaking-wave {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(1.5); opacity: 1; }
-        }
-        @keyframes wave-bar {
-          0% { height: 4px; }
-          100% { height: 14px; }
+        @keyframes serena-blink {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 1; }
         }
       `}</style>
-    </>
+    </div>
   );
-};
-
-export default VoiceAssistant;
+}
