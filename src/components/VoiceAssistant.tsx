@@ -15,6 +15,8 @@ interface SerenaProps {
 
 /* ── Helpers ─────────────────────────────────────────────── */
 
+const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
 const ONES = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf',
   'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
 const TENS = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
@@ -28,7 +30,7 @@ function numToFr(n: number): string {
     const u = n % 10;
     if (t === 7 || t === 9) {
       const base = t === 7 ? 'soixante' : 'quatre-vingt';
-      const rest = (t === 7 ? 10 : 10) + u;
+      const rest = 10 + u;
       return rest < 20 ? `${base}-${ONES[rest]}` : `${base}-${numToFr(rest)}`;
     }
     if (u === 0) return t === 8 ? 'quatre-vingts' : TENS[t];
@@ -56,27 +58,52 @@ function numToFr(n: number): string {
 function formatMoney(amount: number): string {
   const rounded = Math.round(amount);
   if (rounded === 0) return 'zéro dollar';
-  const fr = numToFr(rounded);
-  return `${fr} dollar${rounded > 1 ? 's' : ''}`;
+  return `${numToFr(rounded)} dollar${rounded > 1 ? 's' : ''}`;
 }
 
 function todayStr(): string {
-  const d = new Date();
-  return d.toISOString().slice(0, 10);
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getTimeGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 6) return pick(['Vous êtes matinale! ', 'Debout si tôt? Bravo! ', '']);
+  if (h < 12) return pick(['Bon matin! ', 'Belle matinée! ', 'Bonjour! ']);
+  if (h < 17) return pick(['Bon après-midi! ', 'Bonjour! ', '']);
+  if (h < 21) return pick(['Bonsoir! ', 'Belle soirée! ', '']);
+  return pick(['Bonsoir! ', 'Encore au travail? Vous êtes dévouée! ', '']);
 }
 
 /* ── Navigation commands ─────────────────────────────────── */
 
-const NAV_COMMANDS: Array<{ keywords: string[]; page: Page; response: string }> = [
-  { keywords: ['tableau de bord', 'accueil', 'dashboard', 'retour', 'page principale', 'début'], page: 'dashboard', response: 'Retour au tableau de bord.' },
-  { keywords: ['calendrier', 'nouveau rendez-vous'], page: 'calendar', response: 'Ouverture du calendrier des rendez-vous.' },
-  { keywords: ['facture', 'factures', 'montre-moi les factures', 'paiement'], page: 'invoices', response: 'Affichage des factures.' },
-  { keywords: ['prospect', 'prospects', 'pipeline', 'nouveau client', 'clients potentiels', 'montre-moi les prospects'], page: 'prospects', response: 'Ouverture du pipeline de prospects.' },
-  { keywords: ['ajouter', 'nouvelle relance', 'créer', 'nouveau suivi', 'ajouter une relance', 'créer une relance'], page: 'add', response: 'Ouverture du formulaire. Ajoutons une nouvelle relance.' },
-  { keywords: ['mes relances', 'liste', 'toutes les relances', 'voir les relances'], page: 'list', response: 'Affichage de toutes vos relances.' },
-  { keywords: ['rapport', 'statistiques', 'rapport du jour', 'stats', 'résultats'], page: 'reports', response: 'Ouverture du rapport du jour.' },
-  { keywords: ['briefing', 'briefing du matin', 'matin'], page: 'morning-brief', response: 'Lancement du briefing du matin.' },
-  { keywords: ['tarifs', 'prix', 'plans', 'abonnement', 'pricing', 'forfait'], page: 'pricing', response: 'Affichage des plans et tarifs.' },
+const NAV_COMMANDS: Array<{ keywords: string[]; page: Page; responses: string[] }> = [
+  { keywords: ['tableau de bord', 'accueil', 'dashboard', 'retour', 'page principale', 'début'],
+    page: 'dashboard',
+    responses: ['Je vous ramène au tableau de bord!', 'Retour à l\'accueil, c\'est parti!', 'On retourne au tableau de bord.'] },
+  { keywords: ['calendrier', 'nouveau rendez-vous'],
+    page: 'calendar',
+    responses: ['J\'ouvre votre calendrier!', 'Voici votre calendrier de rendez-vous.', 'C\'est parti, je vous montre le calendrier!'] },
+  { keywords: ['facture', 'factures', 'montre-moi les factures', 'paiement'],
+    page: 'invoices',
+    responses: ['Voici vos factures!', 'J\'affiche vos factures tout de suite.', 'On regarde les factures ensemble.'] },
+  { keywords: ['prospect', 'prospects', 'pipeline', 'nouveau client', 'clients potentiels', 'montre-moi les prospects'],
+    page: 'prospects',
+    responses: ['J\'ouvre votre pipeline de prospects!', 'Voici vos prospects.', 'On jette un coup d\'oeil au pipeline!'] },
+  { keywords: ['ajouter', 'nouvelle relance', 'créer', 'nouveau suivi', 'ajouter une relance', 'créer une relance'],
+    page: 'add',
+    responses: ['J\'ouvre le formulaire pour vous!', 'Parfait, ajoutons une nouvelle relance.', 'C\'est parti, on crée une relance!'] },
+  { keywords: ['mes relances', 'liste', 'toutes les relances', 'voir les relances'],
+    page: 'list',
+    responses: ['Voici toutes vos relances!', 'J\'affiche la liste de vos relances.', 'On regarde vos relances.'] },
+  { keywords: ['rapport', 'statistiques', 'rapport du jour', 'stats', 'résultats'],
+    page: 'reports',
+    responses: ['Voici votre rapport du jour!', 'J\'ouvre les statistiques pour vous.', 'On regarde les chiffres ensemble!'] },
+  { keywords: ['briefing', 'briefing du matin', 'matin'],
+    page: 'morning-brief',
+    responses: ['Je lance votre briefing!', 'Voici votre briefing du matin!', 'C\'est l\'heure du briefing!'] },
+  { keywords: ['tarifs', 'prix', 'plans', 'abonnement', 'pricing', 'forfait'],
+    page: 'pricing',
+    responses: ['Voici les plans et tarifs!', 'J\'affiche les tarifs pour vous.'] },
 ];
 
 /* ── Component ───────────────────────────────────────────── */
@@ -104,16 +131,14 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
   const handsFreeRef = useRef(false);
   const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
-  // Keep ref in sync
   useEffect(() => { handsFreeRef.current = handsFree; }, [handsFree]);
 
-  /* ── Voice selection ────────────────────────────────── */
+  /* ── Voice selection — warm female French voice ──── */
   useEffect(() => {
     function pickVoice() {
       const voices = window.speechSynthesis.getVoices();
       if (!voices.length) return;
 
-      // Score each French voice — prefer warm, friendly female voices
       const frVoices = voices.filter(v => v.lang.startsWith('fr'));
       if (!frVoices.length) return;
 
@@ -127,19 +152,13 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         let score = 0;
         const n = voice.name.toLowerCase();
 
-        // Microsoft Online Natural voices = most human-sounding
         if (n.includes('microsoft') && n.includes('online') && n.includes('natural')) score += 15;
         else if (n.includes('microsoft') && n.includes('online')) score += 12;
-        // Google voices = natural on Android/Chrome
         if (n.includes('google')) score += 10;
-        // Warm female names
         if (warmNames.some(w => n.includes(w))) score += 8;
-        // Female tag
         if (/female|femme/i.test(n)) score += 6;
-        // Avoid male voices entirely
         if (maleNames.some(c => n.includes(c))) score -= 15;
         if (/\bmale\b/i.test(n) && !/female/i.test(n)) score -= 12;
-        // fr-FR slightly preferred (smoother)
         if (voice.lang === 'fr-FR') score += 2;
 
         if (score > bestScore) { bestScore = score; best = voice; }
@@ -168,18 +187,12 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'fr-FR';
-    utter.rate = 0.88;  // Plus calme, posé — comme une vraie assistante
-    utter.pitch = 1.08; // Légèrement plus aigu = plus chaleureux et sympathique
+    utter.rate = 0.92;
+    utter.pitch = 1.05;
     if (selectedVoiceRef.current) utter.voice = selectedVoiceRef.current;
     utter.onstart = () => setSpeaking(true);
-    utter.onend = () => {
-      setSpeaking(false);
-      onDone?.();
-    };
-    utter.onerror = () => {
-      setSpeaking(false);
-      onDone?.();
-    };
+    utter.onend = () => { setSpeaking(false); onDone?.(); };
+    utter.onerror = () => { setSpeaking(false); onDone?.(); };
     window.speechSynthesis.speak(utter);
   }, []);
 
@@ -191,34 +204,71 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
       setResponse(msg);
       speak(msg, () => {
         if (handsFreeRef.current) {
-          // Auto-restart listening after speaking
           setTimeout(() => startListeningInner(), 400);
         }
       });
       if (navPage) setTimeout(() => onNavigate(navPage), delay ?? 600);
       if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
       if (!handsFreeRef.current) {
-        hideTimeoutRef.current = setTimeout(() => setShowBubble(false), 5000);
+        hideTimeoutRef.current = setTimeout(() => setShowBubble(false), 6000);
       }
     };
 
     // ── Exit / Stop ──
-    if (/\b(merci|au revoir|stop|merci serena|bonne nuit)\b/.test(lower)) {
+    if (/\b(merci|au revoir|stop|bonne nuit|à demain|à plus|ciao)\b/.test(lower)) {
       setHandsFree(false);
       handsFreeRef.current = false;
-      reply('Avec plaisir! Je suis là si vous avez besoin. Passe une belle journée!');
+      reply(pick([
+        'Avec plaisir! Passez une excellente journée!',
+        'De rien! Je suis toujours là si vous avez besoin. Bonne continuation!',
+        'C\'est un plaisir de vous aider! À bientôt!',
+        'Parfait! N\'hésitez pas à me rappeler quand vous voulez. Bonne journée!',
+        'À votre service! Bonne fin de journée!',
+      ]));
       hideTimeoutRef.current = setTimeout(() => setShowBubble(false), 4000);
       return;
     }
 
     // ── Greetings ──
-    if (/\b(bonjour|salut|hey|hello|coucou)\b/.test(lower) && !/briefing/.test(lower)) {
-      reply('Hey! C\'est Serena. Qu\'est-ce que je peux faire pour toi aujourd\'hui?');
+    if (/\b(bonjour|salut|hey|hello|coucou|allo)\b/.test(lower) && !/briefing/.test(lower)) {
+      const greeting = getTimeGreeting();
+      reply(pick([
+        `${greeting}C'est Serena! Qu'est-ce que je peux faire pour vous aujourd'hui?`,
+        `${greeting}Ravie de vous retrouver! Comment puis-je vous aider?`,
+        `${greeting}Serena à votre service! Que souhaitez-vous faire?`,
+        `${greeting}Comment allez-vous? Dites-moi comment je peux vous aider!`,
+      ]));
+      return;
+    }
+
+    // ── How are you / personal ──
+    if (/\b(comment (ça va|vas-tu|allez)|ça va)\b/.test(lower)) {
+      reply(pick([
+        'Je vais très bien, merci de demander! Et vous, comment se passe votre journée?',
+        'Toujours en pleine forme pour vous aider! Qu\'est-ce que je peux faire pour vous?',
+        'Super bien! Prête à vous donner un coup de main. Que souhaitez-vous savoir?',
+      ]));
+      return;
+    }
+
+    // ── Thanks ──
+    if (/\b(merci beaucoup|super|génial|parfait|excellent|bravo|cool)\b/.test(lower) && lower.length < 30) {
+      reply(pick([
+        'Ça me fait plaisir! Autre chose que je peux faire pour vous?',
+        'Avec plaisir! N\'hésitez pas si vous avez d\'autres questions.',
+        'Content que ça vous aide! Quoi d\'autre?',
+      ]));
+      return;
+    }
+
+    // ── What can you do ──
+    if (/\b(que (peux|sais)-tu|quoi faire|tes fonctions|aide|help|comment ça marche)\b/.test(lower)) {
+      reply('Je peux vous aider avec plein de choses! Consultez vos rendez-vous, vos factures, vos relances ou vos prospects. Je peux aussi ajouter ou supprimer des rendez-vous, appeler un contact, ou vous faire un résumé de votre journée. Dites-moi ce dont vous avez besoin!');
       return;
     }
 
     // ── Summary / Brief ──
-    if (/\b(résumé|comment ça va|briefing|brief|résume|bilan)\b/.test(lower) && !/briefing du matin|matin/.test(lower)) {
+    if (/\b(résumé|comment ça va les affaires|briefing|brief|résume|bilan|situation)\b/.test(lower) && !/briefing du matin|matin/.test(lower)) {
       const activeFollowUps = followUps.filter(f => !['positive', 'expired'].includes(f.status));
       const overdueInvoices = invoices.filter(i => i.status === 'overdue');
       const overdueTotal = overdueInvoices.reduce((s, i) => s + i.amount, 0);
@@ -226,8 +276,41 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
       const todayAppts = appointments.filter(a => a.date === today);
       const activeProspects = prospects.filter(p => !['gagne', 'perdu'].includes(p.stage));
 
-      const msg = `Voici ton résumé. Vous avez ${numToFr(activeFollowUps.length)} relance${activeFollowUps.length > 1 ? 's' : ''} active${activeFollowUps.length > 1 ? 's' : ''}, ${numToFr(overdueInvoices.length)} facture${overdueInvoices.length > 1 ? 's' : ''} en retard pour ${formatMoney(overdueTotal)}, ${numToFr(todayAppts.length)} rendez-vous aujourd'hui, et ${numToFr(activeProspects.length)} prospect${activeProspects.length > 1 ? 's' : ''} dans le pipeline. Voulez-vous que je vous montre les détails?`;
-      reply(msg);
+      const parts: string[] = [];
+      
+      if (todayAppts.length > 0) {
+        parts.push(`${numToFr(todayAppts.length)} rendez-vous aujourd'hui`);
+      } else {
+        parts.push('aucun rendez-vous aujourd\'hui');
+      }
+      
+      if (activeFollowUps.length > 0) {
+        parts.push(`${numToFr(activeFollowUps.length)} relance${activeFollowUps.length > 1 ? 's' : ''} en cours`);
+      }
+      
+      if (overdueInvoices.length > 0) {
+        parts.push(`${numToFr(overdueInvoices.length)} facture${overdueInvoices.length > 1 ? 's' : ''} en retard pour un total de ${formatMoney(overdueTotal)}`);
+      } else {
+        parts.push('aucune facture en retard');
+      }
+      
+      if (activeProspects.length > 0) {
+        parts.push(`${numToFr(activeProspects.length)} prospect${activeProspects.length > 1 ? 's' : ''} actif${activeProspects.length > 1 ? 's' : ''}`);
+      }
+
+      const intro = pick([
+        'Voici votre résumé!',
+        'Alors, faisons le point!',
+        'Voici où vous en êtes.',
+      ]);
+      
+      const outro = pick([
+        'Voulez-vous que je vous montre quelque chose en détail?',
+        'Souhaitez-vous approfondir un de ces points?',
+        'Dites-moi si vous voulez en savoir plus sur un sujet en particulier.',
+      ]);
+
+      reply(`${intro} Vous avez ${parts.join(', ')}. ${outro}`);
       return;
     }
 
@@ -235,31 +318,45 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
     if (/\b(relances?\s*urgente|urgent)\b/.test(lower)) {
       const urgent = followUps.filter(f => f.priority === 'haute' && !['positive', 'expired'].includes(f.status));
       if (urgent.length === 0) {
-        reply('Bonne nouvelle! Aucune relance urgente en ce moment.');
+        reply(pick([
+          'Bonne nouvelle, aucune relance urgente en ce moment! Tout roule.',
+          'Rien d\'urgent côté relances! Vous êtes bien organisée.',
+          'Zéro urgence côté relances! Profitez-en.',
+        ]));
       } else {
         const names = urgent.slice(0, 3).map(f => `${f.clientName}${f.amount ? ' pour ' + formatMoney(f.amount) : ''}`).join(', ');
-        reply(`Vous avez ${numToFr(urgent.length)} relance${urgent.length > 1 ? 's' : ''} urgente${urgent.length > 1 ? 's' : ''}. ${names}. Voulez-vous que je vous montre les détails?`);
+        reply(`Attention, vous avez ${numToFr(urgent.length)} relance${urgent.length > 1 ? 's' : ''} urgente${urgent.length > 1 ? 's' : ''}. ${names}. Voulez-vous que je vous montre les détails?`);
       }
       return;
     }
 
     if (/\b(combien de relances|mes relances|relances)\b/.test(lower) && !/voir|toutes|liste/.test(lower)) {
       const active = followUps.filter(f => !['positive', 'expired'].includes(f.status));
-      const byStatus: Record<string, number> = {};
-      active.forEach(f => { byStatus[f.status] = (byStatus[f.status] || 0) + 1; });
-      const statusLabels: Record<string, string> = { pending: 'en attente', sent: 'envoyées', no_reply: 'sans réponse', negative: 'négatives' };
-      const details = Object.entries(byStatus).map(([s, c]) => `${numToFr(c)} ${statusLabels[s] || s}`).join(', ');
-      reply(`Vous avez ${numToFr(active.length)} relance${active.length > 1 ? 's' : ''} active${active.length > 1 ? 's' : ''}. ${details}. Voulez-vous que je vous montre les détails?`);
+      if (active.length === 0) {
+        reply(pick([
+          'Vous n\'avez aucune relance active pour le moment. Tout est à jour!',
+          'Aucune relance en cours! Votre suivi est impeccable.',
+        ]));
+      } else {
+        const byStatus: Record<string, number> = {};
+        active.forEach(f => { byStatus[f.status] = (byStatus[f.status] || 0) + 1; });
+        const statusLabels: Record<string, string> = { pending: 'en attente', sent: 'envoyées', no_reply: 'sans réponse', negative: 'négatives' };
+        const details = Object.entries(byStatus).map(([s, c]) => `${numToFr(c)} ${statusLabels[s] || s}`).join(', ');
+        reply(`Vous avez ${numToFr(active.length)} relance${active.length > 1 ? 's' : ''} active${active.length > 1 ? 's' : ''}. ${details}. Voulez-vous que je vous amène à la liste?`);
+      }
       return;
     }
 
     if (/\b(qui dois-je relancer|qui relancer)\b/.test(lower)) {
       const toFollow = followUps.filter(f => ['sent', 'pending', 'no_reply'].includes(f.status));
       if (toFollow.length === 0) {
-        reply('Personne à relancer pour le moment. Tout est à jour!');
+        reply(pick([
+          'Personne à relancer pour le moment! Tout est à jour, bravo!',
+          'Aucun client à relancer. Votre suivi est au top!',
+        ]));
       } else {
         const names = toFollow.slice(0, 4).map(f => f.clientName).join(', ');
-        reply(`Vous devez relancer ${numToFr(toFollow.length)} client${toFollow.length > 1 ? 's' : ''}. Notamment ${names}. Voulez-vous que je vous montre la liste?`);
+        reply(`Vous devriez relancer ${numToFr(toFollow.length)} client${toFollow.length > 1 ? 's' : ''}. Notamment ${names}. Voulez-vous que je vous montre la liste complète?`);
       }
       return;
     }
@@ -268,19 +365,26 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
     if (/\b(factures?\s*en\s*retard|impayé|impayés)\b/.test(lower)) {
       const overdue = invoices.filter(i => i.status === 'overdue');
       if (overdue.length === 0) {
-        reply('Aucune facture en retard. Tout est en ordre!');
+        reply(pick([
+          'Excellente nouvelle! Aucune facture en retard. Vos clients sont à jour!',
+          'Zéro facture en retard! Tout est en ordre de ce côté.',
+        ]));
       } else {
         const total = overdue.reduce((s, i) => s + i.amount, 0);
         const names = overdue.slice(0, 3).map(i => i.clientName).join(', ');
-        reply(`Vous avez ${numToFr(overdue.length)} facture${overdue.length > 1 ? 's' : ''} en retard pour un total de ${formatMoney(total)}. Clients concernés: ${names}. Voulez-vous que je vous montre les détails?`);
+        reply(`Vous avez ${numToFr(overdue.length)} facture${overdue.length > 1 ? 's' : ''} en retard pour un total de ${formatMoney(total)}. ${pick(['Les clients concernés sont', 'Il s\'agit de'])} ${names}. Voulez-vous envoyer une relance?`);
       }
       return;
     }
 
-    if (/\b(combien on me doit|argent|total dû|montant dû)\b/.test(lower)) {
+    if (/\b(combien on me doit|argent|total dû|montant dû|combien me doit)\b/.test(lower)) {
       const owed = invoices.filter(i => i.status === 'overdue' || i.status === 'pending');
       const total = owed.reduce((s, i) => s + i.amount, 0);
-      reply(`On vous doit un total de ${formatMoney(total)} sur ${numToFr(owed.length)} facture${owed.length > 1 ? 's' : ''}. Voulez-vous voir le détail?`);
+      if (total === 0) {
+        reply('Personne ne vous doit d\'argent en ce moment! Tout est réglé.');
+      } else {
+        reply(`On vous doit un total de ${formatMoney(total)} sur ${numToFr(owed.length)} facture${owed.length > 1 ? 's' : ''}. Voulez-vous voir le détail?`);
+      }
       return;
     }
 
@@ -288,22 +392,26 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
     if (/\b(nouveaux?\s*prospect|nouveau\s*prospect)\b/.test(lower)) {
       const newP = prospects.filter(p => p.stage === 'nouveau');
       if (newP.length === 0) {
-        reply('Pas de nouveau prospect pour le moment.');
+        reply('Pas de nouveau prospect pour le moment. On garde l\'oeil ouvert!');
       } else {
         const names = newP.slice(0, 3).map(p => p.name).join(', ');
-        reply(`Vous avez ${numToFr(newP.length)} nouveau${newP.length > 1 ? 'x' : ''} prospect${newP.length > 1 ? 's' : ''}. ${names}. Voulez-vous que je vous montre le pipeline?`);
+        reply(`Vous avez ${numToFr(newP.length)} nouveau${newP.length > 1 ? 'x' : ''} prospect${newP.length > 1 ? 's' : ''}! ${names}. Voulez-vous voir le pipeline?`);
       }
       return;
     }
 
     if (/\b(mes prospects|pipeline|prospect)\b/.test(lower) && !/montre|voir|ouvr/.test(lower)) {
       const active = prospects.filter(p => !['gagne', 'perdu'].includes(p.stage));
-      const totalValue = active.reduce((s, p) => s + (p.estimatedValue || 0), 0);
-      const byStage: Record<string, number> = {};
-      active.forEach(p => { byStage[p.stage] = (byStage[p.stage] || 0) + 1; });
-      const stageLabels: Record<string, string> = { nouveau: 'nouveaux', contacte: 'contactés', qualifie: 'qualifiés', proposition: 'en proposition' };
-      const details = Object.entries(byStage).map(([s, c]) => `${numToFr(c)} ${stageLabels[s] || s}`).join(', ');
-      reply(`Vous avez ${numToFr(active.length)} prospect${active.length > 1 ? 's' : ''} actif${active.length > 1 ? 's' : ''}: ${details}. Valeur estimée totale: ${formatMoney(totalValue)}. Voulez-vous que je vous montre les détails?`);
+      if (active.length === 0) {
+        reply('Votre pipeline est vide pour le moment. C\'est le moment d\'aller chercher de nouveaux clients!');
+      } else {
+        const totalValue = active.reduce((s, p) => s + (p.estimatedValue || 0), 0);
+        const byStage: Record<string, number> = {};
+        active.forEach(p => { byStage[p.stage] = (byStage[p.stage] || 0) + 1; });
+        const stageLabels: Record<string, string> = { nouveau: 'nouveaux', contacte: 'contactés', qualifie: 'qualifiés', proposition: 'en proposition' };
+        const details = Object.entries(byStage).map(([s, c]) => `${numToFr(c)} ${stageLabels[s] || s}`).join(', ');
+        reply(`Votre pipeline compte ${numToFr(active.length)} prospect${active.length > 1 ? 's' : ''} actif${active.length > 1 ? 's' : ''}. ${details}. La valeur estimée totale est de ${formatMoney(totalValue)}. Souhaitez-vous voir les détails?`);
+      }
       return;
     }
 
@@ -312,10 +420,14 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
       const today = todayStr();
       const todayAppts = appointments.filter(a => a.date === today);
       if (todayAppts.length === 0) {
-        reply('Aucun rendez-vous prévu aujourd\'hui. Votre journée est libre!');
+        reply(pick([
+          'Aucun rendez-vous prévu aujourd\'hui! Votre journée est libre.',
+          'Journée libre aujourd\'hui, aucun rendez-vous au programme!',
+          'Rien au calendrier aujourd\'hui. Profitez-en!',
+        ]));
       } else {
         const list = todayAppts.slice(0, 3).map(a => `${a.time} avec ${a.clientName}`).join(', ');
-        reply(`Vous avez ${numToFr(todayAppts.length)} rendez-vous aujourd'hui. ${list}. Voulez-vous voir votre calendrier?`);
+        reply(`Vous avez ${numToFr(todayAppts.length)} rendez-vous aujourd'hui. ${list}. Voulez-vous voir votre calendrier complet?`);
       }
       return;
     }
@@ -326,25 +438,22 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         .filter(a => new Date(`${a.date}T${a.time}`) > now)
         .sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
       if (upcoming.length === 0) {
-        reply('Aucun rendez-vous à venir.');
+        reply('Aucun rendez-vous à venir pour le moment.');
       } else {
         const next = upcoming[0];
-        reply(`Votre prochain rendez-vous est le ${next.date} à ${next.time} avec ${next.clientName}, sujet: ${next.subject}.`);
+        const dayName = new Date(next.date + 'T00:00:00').toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
+        reply(`Votre prochain rendez-vous est ${dayName} à ${next.time} avec ${next.clientName}. Le sujet: ${next.subject}.`);
       }
       return;
     }
 
     // ── Calendar management: ADD appointment ──
-    // Patterns: "ajoute un rendez-vous avec Marie demain à 14h", "rendez-vous avec Pierre lundi 10h"
-    // "nouveau rdv avec Sophie après-demain 9h30 pour présentation devis"
     if (/\b(ajoute|nouveau|créer?|planifi|prend|book|fixe|met)\b.*\b(rendez-vous|rdv|rencontre|meeting)\b/.test(lower) ||
         /\b(rendez-vous|rdv)\b.*\b(avec)\b/.test(lower) && /\b(demain|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|après-demain|aujourd)\b/.test(lower)) {
       
-      // Extract client name after "avec"
       const nameMatch = lower.match(/avec\s+([a-zàâäéèêëïîôùûüÿç\-]+(?:\s+[a-zàâäéèêëïîôùûüÿç\-]+)?)/i);
       const clientName = nameMatch ? nameMatch[1].split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '';
       
-      // Extract time
       let hour = 10, minute = 0;
       const timeMatch = lower.match(/(\d{1,2})\s*[h:]\s*(\d{0,2})/);
       if (timeMatch) {
@@ -358,7 +467,6 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         hour = 14;
       }
       
-      // Extract date
       const today = new Date();
       let targetDate = new Date(today);
       
@@ -369,7 +477,6 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
       } else if (/aujourd/.test(lower)) {
         // today
       } else {
-        // Day of week
         const dayNames: Record<string, number> = {
           'lundi': 1, 'mardi': 2, 'mercredi': 3, 'jeudi': 4,
           'vendredi': 5, 'samedi': 6, 'dimanche': 0,
@@ -383,7 +490,6 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
             break;
           }
         }
-        // Check for specific date like "le 15" or "15 juin"
         const dateNumMatch = lower.match(/le\s+(\d{1,2})/);
         if (dateNumMatch) {
           const dayOfMonth = parseInt(dateNumMatch[1]);
@@ -395,29 +501,29 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
       const dateStr = targetDate.toISOString().slice(0, 10);
       const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
       
-      // Extract subject (after "pour" or "sujet")
       const subjectMatch = lower.match(/(?:pour|sujet|concernant|à propos)\s+(.+?)(?:\s+(?:à|demain|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|après)|$)/);
       const subject = subjectMatch 
         ? subjectMatch[1].charAt(0).toUpperCase() + subjectMatch[1].slice(1) 
         : 'Rendez-vous';
       
       if (!clientName) {
-        reply('Avec qui souhaitez-vous prendre rendez-vous? Par exemple: ajoute un rendez-vous avec Marie demain à 14 heures.');
+        reply(pick([
+          'Avec qui souhaitez-vous prendre rendez-vous? Dites-moi le nom!',
+          'Bien sûr! Dites-moi avec qui et je m\'occupe du reste.',
+          'Je veux bien vous aider! Avec qui est le rendez-vous?',
+        ]));
         return;
       }
       
-      // Extract duration if mentioned
       let duration = 30;
       const durationMatch = lower.match(/(\d+)\s*min/);
       if (durationMatch) duration = parseInt(durationMatch[1]);
       else if (/une heure|1\s*h(?![\d])/.test(lower)) duration = 60;
       else if (/deux heures|2\s*h(?![\d])/.test(lower)) duration = 120;
       
-      // Extract location
       const locationMatch = lower.match(/(?:chez|au|à|lieu)\s+(.+?)(?:\s+(?:pour|à|demain)|$)/);
       const location = locationMatch ? locationMatch[1] : undefined;
       
-      // Look up client email from existing data
       const existingClient = [...followUps, ...invoices].find(
         item => item.clientName.toLowerCase().includes(clientName.toLowerCase())
       );
@@ -435,7 +541,11 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         location,
       });
       
-      reply(`C'est noté! Rendez-vous ajouté avec ${clientName}, ${formattedDate} à ${timeStr}, durée ${numToFr(duration)} minutes. ${subject}. Voulez-vous que je vous montre le calendrier?`, 'calendar', 2000);
+      reply(pick([
+        `C'est noté! Rendez-vous avec ${clientName} le ${formattedDate} à ${timeStr}. Je vous montre le calendrier!`,
+        `Parfait! J'ai ajouté votre rendez-vous avec ${clientName}, ${formattedDate} à ${timeStr}. C'est fait!`,
+        `Rendez-vous confirmé avec ${clientName}! ${formattedDate} à ${timeStr}. Je vous ouvre le calendrier.`,
+      ]), 'calendar', 2000);
       return;
     }
 
@@ -449,12 +559,15 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         
         if (found) {
           onDeleteAppointment(found.id);
-          reply(`Le rendez-vous avec ${found.clientName} le ${found.date} à ${found.time} a été supprimé. Voulez-vous voir le calendrier?`, 'calendar', 2000);
+          const dayName = new Date(found.date + 'T00:00:00').toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
+          reply(pick([
+            `C'est fait! Le rendez-vous avec ${found.clientName} du ${dayName} à ${found.time} est supprimé.`,
+            `Rendez-vous avec ${found.clientName} annulé! ${dayName} à ${found.time}, c'est retiré de votre calendrier.`,
+          ]), 'calendar', 2000);
         } else {
-          reply(`Je n'ai pas trouvé de rendez-vous avec ${nameMatch[1]}. Voulez-vous que je vous montre le calendrier?`);
+          reply(`Je n'ai pas trouvé de rendez-vous avec ${nameMatch[1]}. Voulez-vous que je vous montre le calendrier pour vérifier?`);
         }
       } else {
-        // No name specified - delete next upcoming
         const now = new Date();
         const upcoming = appointments
           .filter(a => new Date(`${a.date}T${a.time}`) > now)
@@ -463,7 +576,7 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         if (upcoming.length > 0) {
           const next = upcoming[0];
           onDeleteAppointment(next.id);
-          reply(`Le prochain rendez-vous avec ${next.clientName} le ${next.date} à ${next.time} a été annulé.`);
+          reply(`Le prochain rendez-vous avec ${next.clientName} a été annulé.`);
         } else {
           reply('Aucun rendez-vous à venir à supprimer.');
         }
@@ -480,7 +593,6 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         const found = appointments.find(a => a.clientName.toLowerCase().includes(searchName));
         
         if (found) {
-          // Parse new time/date
           let newDate = new Date();
           const today = new Date();
           
@@ -516,7 +628,6 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
           const newTimeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
           const formattedNewDate = newDate.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
           
-          // Delete old + add new
           onDeleteAppointment(found.id);
           onAddAppointment({
             clientName: found.clientName,
@@ -529,12 +640,15 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
             notes: found.notes,
           });
           
-          reply(`Rendez-vous avec ${found.clientName} déplacé au ${formattedNewDate} à ${newTimeStr}. C'est fait!`, 'calendar', 2000);
+          reply(pick([
+            `C'est fait! Le rendez-vous avec ${found.clientName} est maintenant le ${formattedNewDate} à ${newTimeStr}.`,
+            `Parfait, j'ai déplacé votre rendez-vous avec ${found.clientName} au ${formattedNewDate} à ${newTimeStr}!`,
+          ]), 'calendar', 2000);
         } else {
-          reply(`Je n'ai pas trouvé de rendez-vous avec ${nameMatch[1]}.`);
+          reply(`Je n'ai pas trouvé de rendez-vous avec ${nameMatch[1]}. Voulez-vous vérifier dans le calendrier?`);
         }
       } else {
-        reply('Avec qui est le rendez-vous que vous souhaitez déplacer?');
+        reply('Avec qui est le rendez-vous que vous souhaitez déplacer? Dites-moi le nom!');
       }
       return;
     }
@@ -552,7 +666,10 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         .sort((a, b) => a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date));
       
       if (thisWeek.length === 0) {
-        reply('Aucun rendez-vous cette semaine. Votre agenda est libre!');
+        reply(pick([
+          'Aucun rendez-vous cette semaine! Votre agenda est complètement libre.',
+          'Semaine tranquille! Rien au calendrier pour les prochains jours.',
+        ]));
       } else {
         const list = thisWeek.slice(0, 5).map(a => {
           const dayName = new Date(a.date + 'T00:00:00').toLocaleDateString('fr-CA', { weekday: 'long' });
@@ -568,7 +685,6 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
       const nameMatch = lower.match(/(?:appelle|appeler|téléphone|phone|call|numéro)\s*(?:à|de|du|le|la)?\s*(.+)/);
       if (nameMatch) {
         const searchName = nameMatch[1].trim().replace(/^(le|la|du|de)\s+/, '');
-        // Search across all data sources for the contact
         const fu = followUps.find(f => f.clientName.toLowerCase().includes(searchName));
         const inv = invoices.find(i => i.clientName.toLowerCase().includes(searchName));
         const prsp = prospects.find(p => p.name.toLowerCase().includes(searchName));
@@ -578,12 +694,12 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         const contactPhone = fu?.clientPhone || inv?.clientPhone || prsp?.phone || appt?.clientPhone;
         
         if (contactName && contactPhone) {
-          reply(`${contactName}, numéro: ${contactPhone}. J'ouvre l'appel maintenant.`);
-          setTimeout(() => { window.open(`tel:${contactPhone.replace(/[^+\d]/g, '')}`, '_self'); }, 2000);
+          reply(`${contactName}! Son numéro est le ${contactPhone}. Je lance l'appel pour vous!`);
+          setTimeout(() => { window.open(`tel:${contactPhone.replace(/[^+\d]/g, '')}`, '_self'); }, 2500);
         } else if (contactName) {
-          reply(`J'ai trouvé ${contactName} mais je n'ai pas son numéro de téléphone. Voulez-vous lui envoyer un email?`);
+          reply(`J'ai trouvé ${contactName} dans vos contacts, mais je n'ai pas son numéro de téléphone malheureusement.`);
         } else {
-          reply(`Je n'ai pas trouvé de contact nommé "${searchName}" dans votre répertoire.`);
+          reply(`Je n'ai pas trouvé de contact du nom de "${searchName}" dans votre répertoire.`);
         }
         return;
       }
@@ -605,13 +721,13 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         
         if (contactName) {
           let info = `${contactName}. `;
-          if (contactPhone) info += `Téléphone: ${contactPhone}. `;
-          if (contactEmail) info += `Email: ${contactEmail}. `;
-          if (!contactPhone && !contactEmail) info += `Aucune coordonnée enregistrée.`;
-          info += contactPhone ? ` Tu veux que je l'appelle?` : '';
+          if (contactPhone) info += `Son téléphone: ${contactPhone}. `;
+          if (contactEmail) info += `Son email: ${contactEmail}. `;
+          if (!contactPhone && !contactEmail) info += `Je n'ai aucune coordonnée pour cette personne.`;
+          if (contactPhone) info += `Voulez-vous que je l'appelle?`;
           reply(info);
         } else {
-          reply(`Je n'ai pas trouvé de contact nommé "${searchName}".`);
+          reply(`Je n'ai pas trouvé de contact du nom de "${searchName}".`);
         }
         return;
       }
@@ -624,9 +740,9 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         const name = match[1].trim();
         const fu = followUps.find(f => f.clientName.toLowerCase().includes(name));
         if (fu) {
-          reply(`Relance pour ${fu.clientName}. ${fu.subject}. Je vous amène au briefing.`, 'morning-brief', 1200);
+          reply(`Relance pour ${fu.clientName}, sujet: ${fu.subject}. Je vous amène au briefing pour gérer ça!`, 'morning-brief', 1200);
         } else {
-          reply(`Je n'ai pas trouvé de client nommé ${name} dans vos relances.`);
+          reply(`Je n'ai pas trouvé de client nommé "${name}" dans vos relances. Voulez-vous vérifier la liste?`);
         }
         return;
       }
@@ -635,13 +751,34 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
     // ── Navigation commands ──
     for (const cmd of NAV_COMMANDS) {
       if (cmd.keywords.some(kw => lower.includes(kw))) {
-        reply(cmd.response, cmd.page);
+        reply(pick(cmd.responses), cmd.page);
         return;
       }
     }
 
-    // ── Fallback ──
-    reply('J\'ai pas bien compris! Vous pouvez me demander un résumé, vos relances, factures, prospects ou rendez-vous.');
+    // ── Smart fallback ──
+    // Try to understand partial intent
+    if (/\b(combien|nombre|total)\b/.test(lower)) {
+      reply('Vous voulez savoir combien de quoi exactement? Je peux vous dire le nombre de relances, factures, prospects ou rendez-vous.');
+      return;
+    }
+
+    if (/\b(montre|affiche|voir|ouvr)\b/.test(lower)) {
+      reply('Que souhaitez-vous voir? Votre calendrier, vos factures, vos relances ou vos prospects?');
+      return;
+    }
+
+    if (/\b(quand|quelle heure|à quelle)\b/.test(lower)) {
+      reply('Vous cherchez une information sur un rendez-vous? Dites-moi "mon planning" ou "prochain rendez-vous" pour que je vérifie!');
+      return;
+    }
+
+    reply(pick([
+      'Hmm, je n\'ai pas bien saisi. Essayez de me dire ce que vous cherchez, comme "mon résumé", "mes factures" ou "ajoute un rendez-vous"!',
+      'Pardon, je n\'ai pas compris. Vous pouvez me demander un résumé, consulter vos relances, vos factures ou votre planning!',
+      'Désolée, je n\'ai pas capté! Essayez quelque chose comme "résumé", "factures en retard" ou "prochain rendez-vous".',
+      'Je n\'ai pas bien entendu. Dites-moi par exemple "bonjour" pour commencer, ou demandez-moi directement ce dont vous avez besoin!',
+    ]));
   }, [followUps, invoices, prospects, appointments, onNavigate, onAddAppointment, onDeleteAppointment, speak]);
 
   /* ── Start listening ────────────────────────────────── */
@@ -680,10 +817,10 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
     recognition.onerror = (event: any) => {
       setListening(false);
       if (event.error === 'not-allowed') {
-        setResponse('Microphone refusé. Veuillez autoriser l\'accès au micro.');
-        speak('Veuillez autoriser l\'accès au microphone.');
+        setResponse('Microphone non autorisé. Veuillez permettre l\'accès au micro dans vos paramètres.');
+        speak('Veuillez autoriser l\'accès au microphone dans vos paramètres.');
       } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        setResponse('Erreur de reconnaissance. Réessayez.');
+        setResponse(pick(['Oups, petite erreur! Réessayez.', 'Je n\'ai rien capté. Essayez encore!']));
       }
     };
 
@@ -695,7 +832,7 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
       recognition.start();
     } catch {
       setListening(false);
-      setResponse('Impossible de démarrer le micro.');
+      setResponse('Impossible de démarrer le micro. Vérifiez vos permissions.');
     }
   }, [processCommand, speak]);
 
@@ -780,7 +917,7 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
             letterSpacing: 1.5,
             textTransform: 'uppercase',
           }}>
-            {listening ? 'À l\'écoute...' : speaking ? 'En train de parler...' : 'Assistante vocale'}
+            {listening ? 'Je vous écoute...' : speaking ? 'Je vous réponds...' : 'Votre assistante vocale'}
           </p>
         </div>
 
@@ -908,14 +1045,15 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
           width: '100%',
         }}>
           <p style={{ color: '#8a96a8', fontSize: '0.75rem', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', margin: '0 0 10px', textAlign: 'center' }}>
-            Commandes vocales
+            Essayez de dire...
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {[
-              'Ajouter un rendez-vous demain à 14h avec...',
-              'Lister mon planning de demain',
-              'Supprimer le rendez-vous de...',
-              'Appelez [nom du contact]',
+              '"Bonjour Serena!"',
+              '"Donne-moi mon résumé"',
+              '"Ajoute un rendez-vous demain à 14h avec..."',
+              '"Quelles sont mes factures en retard?"',
+              '"Appelle [nom du contact]"',
             ].map((cmd, i) => (
               <p key={i} style={{ color: '#b8c4d0', fontSize: '0.8rem', margin: 0, paddingLeft: 12, borderLeft: '2px solid rgba(6,182,212,0.2)' }}>
                 {cmd}
@@ -958,9 +1096,7 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
             <X size={12} />
           </button>
 
-          {/* Header with avatar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            {/* Avatar */}
             <div style={{
               width: 24, height: 24, borderRadius: '50%',
               background: 'linear-gradient(135deg, #06b6d4, #0ea5e9)',
@@ -970,7 +1106,6 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
               flexShrink: 0,
             }}>S</div>
 
-            {/* Status indicator */}
             <div style={{
               width: 8, height: 8, borderRadius: '50%',
               background: listening ? '#ef4444' : speaking ? '#06b6d4' : '#38bdf8',
@@ -985,11 +1120,10 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
               textTransform: 'uppercase',
               textShadow: '0 0 12px rgba(6,182,212,0.3)',
             }}>
-              {listening ? 'À l\'écoute...' : speaking ? 'Serena parle...' : 'Serena'}
+              {listening ? 'Je vous écoute...' : speaking ? 'Serena répond...' : 'Serena'}
             </span>
           </div>
 
-          {/* Speaking wave indicator */}
           {speaking && (
             <div style={{ display: 'flex', gap: 2, marginBottom: 8, alignItems: 'center', height: 16 }}>
               {[0, 1, 2, 3, 4].map(i => (
@@ -1020,10 +1154,9 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
             lineHeight: 1.5,
             fontWeight: 500,
           }}>
-            {response || 'Serena — Assistante FollowBoss'}
+            {response || 'Serena — Votre assistante vocale'}
           </div>
 
-          {/* Hands-free toggle */}
           <button
             onClick={toggleHandsFree}
             style={{
@@ -1050,7 +1183,7 @@ const VoiceAssistant: React.FC<SerenaProps> = ({
         </div>
       )}
 
-      {/* Floating mic button with label */}
+      {/* Floating mic button */}
       <div style={{
         position: 'fixed',
         bottom: 30,
