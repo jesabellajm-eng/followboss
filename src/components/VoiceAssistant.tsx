@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { Appointment, Invoice, Prospect, FollowUp, Page } from '../types';
 
-const GEMINI_API_KEY = 'AIzaSyAD7K_J_2caajMOeYtsgxtMgM8vEcbgF8I';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+// API key is server-side only
+const GEMINI_URL = '/api/gemini';
 
 interface Props {
   appointments?: Appointment[];
@@ -105,7 +105,7 @@ export default function VoiceAssistant({
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'fr-CA';
-    utterance.rate = 1.15;
+    utterance.rate = 1.3;
     utterance.pitch = 1.05;
     utterance.volume = 1;
     
