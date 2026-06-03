@@ -102,28 +102,60 @@ export default function VoiceAssistant({
   }, []);
 
   const speak = useCallback((text: string) => {
+    // Chrome Android fix: cancel + wait before speaking
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'fr-CA';
-    utterance.rate = 1.3;
-    utterance.pitch = 1.05;
-    utterance.volume = 1;
     
-    const voice = getFrenchVoice();
-    if (voice) utterance.voice = voice;
+    const doSpeak = () => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-CA';
+      utterance.rate = 1.3;
+      utterance.pitch = 1.05;
+      utterance.volume = 1;
+      
+      const voice = getFrenchVoice();
+      if (voice) utterance.voice = voice;
 
-    utterance.onstart = () => { setIsSpeaking(true); isSpeakingRef.current = true; };
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-      if (isHandsFreeRef.current) {
-        handsFreeTimeoutRef.current = setTimeout(() => startListening(), 400);
-      }
+      utterance.onstart = () => { setIsSpeaking(true); isSpeakingRef.current = true; };
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        if (isHandsFreeRef.current) {
+          handsFreeTimeoutRef.current = setTimeout(() => startListening(), 400);
+        }
+      };
+      utterance.onerror = (e) => {
+        console.warn('Speech error:', e);
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        // Chrome Android retry: sometimes first attempt fails silently
+        if (!retried) {
+          retried = true;
+          setTimeout(() => {
+            window.speechSynthesis.cancel();
+            setTimeout(() => window.speechSynthesis.speak(utterance), 100);
+          }, 200);
+        }
+      };
+
+      synthRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+      
+      // Chrome Android bug: speech can get stuck in queue, force resume
+      setTimeout(() => {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+        // Chrome sometimes silently stops — check and retry
+        if (!window.speechSynthesis.speaking && !isSpeakingRef.current && !retried) {
+          retried = true;
+          window.speechSynthesis.speak(utterance);
+        }
+      }, 250);
     };
-    utterance.onerror = () => { setIsSpeaking(false); isSpeakingRef.current = false; };
 
-    synthRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    let retried = false;
+    // Small delay after cancel() prevents Chrome Android from swallowing the utterance
+    setTimeout(doSpeak, 150);
   }, [getFrenchVoice]);
 
   // Build context for AI
@@ -436,6 +468,17 @@ export default function VoiceAssistant({
   useEffect(() => {
     window.speechSynthesis.getVoices();
     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    
+    // Chrome Android: unlock speech synthesis on first user touch
+    const unlockSpeech = () => {
+      const u = new SpeechSynthesisUtterance('');
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+      document.removeEventListener('touchstart', unlockSpeech);
+      document.removeEventListener('click', unlockSpeech);
+    };
+    document.addEventListener('touchstart', unlockSpeech, { once: true });
+    document.addEventListener('click', unlockSpeech, { once: true });
   }, []);
 
   return (
