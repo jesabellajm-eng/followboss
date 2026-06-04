@@ -60,6 +60,8 @@ export default function VoiceAssistant({
   const [transcript, setTranscript] = useState('');
   const [conversation, setConversation] = useState<{role: 'user' | 'serena', text: string}[]>([]);
   const [isThinking, setIsThinking] = useState(false);
+  const [wakeWordHeard, setWakeWordHeard] = useState(false);
+  const wakeWordTimeoutRef = useRef<any>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
   const conversationEndRef = useRef<HTMLDivElement>(null);
@@ -407,10 +409,65 @@ export default function VoiceAssistant({
           interimT += event.results[i][0].transcript;
         }
       }
-      setTranscript(interimT || finalT);
-      if (finalT) {
-        setTranscript('');
-        processUserInput(finalT);
+      
+      // In hands-free mode: require wake word "Serena" or "Hey Serena"
+      if (isHandsFreeRef.current) {
+        const lower = (interimT || finalT).toLowerCase().trim();
+        const hasWakeWord = lower.startsWith('serena') || lower.startsWith('hey serena') 
+          || lower.startsWith('hé serena') || lower.startsWith('eh serena')
+          || lower.startsWith('ok serena') || lower.startsWith('dis serena')
+          || lower.includes('serena');
+        
+        if (hasWakeWord) {
+          setWakeWordHeard(true);
+          clearTimeout(wakeWordTimeoutRef.current);
+          wakeWordTimeoutRef.current = setTimeout(() => setWakeWordHeard(false), 3000);
+        }
+        
+        if (interimT && !finalT) {
+          if (hasWakeWord) {
+            // Show interim text only if wake word detected
+            const cleaned = interimT.replace(/^(hey |hé |eh |ok |dis )?serena[,\s]*/i, '').trim();
+            setTranscript(cleaned || interimT);
+          }
+          return;
+        }
+        
+        if (finalT) {
+          const lowerFinal = finalT.toLowerCase().trim();
+          const wakeDetected = lowerFinal.startsWith('serena') || lowerFinal.startsWith('hey serena')
+            || lowerFinal.startsWith('hé serena') || lowerFinal.startsWith('eh serena')
+            || lowerFinal.startsWith('ok serena') || lowerFinal.startsWith('dis serena')
+            || lowerFinal.includes('serena');
+          
+          if (wakeDetected) {
+            // Strip wake word and process the command
+            let command = finalT.replace(/^(hey |hé |eh |ok |dis )?serena[,\s]*/i, '').trim();
+            if (!command || command.length < 2) {
+              // User just said "Serena" without a command - prompt them
+              setTranscript('');
+              setWakeWordHeard(true);
+              const prompt = "Oui, je vous écoute! Que puis-je faire pour vous?";
+              setConversation(prev => [...prev, { role: 'serena', text: prompt }]);
+              speak(prompt);
+              return;
+            }
+            setTranscript('');
+            setWakeWordHeard(false);
+            processUserInput(command);
+          } else {
+            // No wake word in hands-free = ignore
+            setTranscript('');
+          }
+          return;
+        }
+      } else {
+        // Normal mode (not hands-free): process everything
+        setTranscript(interimT || finalT);
+        if (finalT) {
+          setTranscript('');
+          processUserInput(finalT);
+        }
       }
     };
 
@@ -459,7 +516,7 @@ export default function VoiceAssistant({
     } else {
       setIsHandsFree(true);
       isHandsFreeRef.current = true;
-      const msg = "Mode mains-libres activé! Je vous écoute en continu. Parfait pour la route.";
+      const msg = "Mode mains-libres activé! Dites simplement Hey Serena suivi de votre demande. Parfait pour la route.";
       setConversation(prev => [...prev, { role: 'serena', text: msg }]);
       speak(msg);
     }
@@ -470,6 +527,7 @@ export default function VoiceAssistant({
       try { recognitionRef.current?.stop(); } catch(e) {}
       window.speechSynthesis.cancel();
       clearTimeout(handsFreeTimeoutRef.current);
+      clearTimeout(wakeWordTimeoutRef.current);
     };
   }, []);
 
@@ -514,7 +572,7 @@ export default function VoiceAssistant({
           ? '0 0 40px rgba(0,212,255,0.5), 0 0 80px rgba(80,200,120,0.2)'
           : isThinking ? '0 0 30px rgba(255,215,0,0.3)'
           : '0 0 20px rgba(0,212,255,0.2)',
-        animation: isSpeaking ? 'serena-pulse 1.5s ease-in-out infinite' : isThinking ? 'serena-pulse 0.8s ease-in-out infinite' : 'none',
+        animation: isSpeaking ? 'serena-pulse 1.5s ease-in-out infinite' : isThinking ? 'serena-pulse 0.8s ease-in-out infinite' : wakeWordHeard ? 'serena-pulse 1s ease-in-out infinite' : 'none',
         transition: 'all 0.3s ease',
       }}>
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -528,7 +586,7 @@ export default function VoiceAssistant({
         WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
       }}>Serena</h2>
       <p style={{ color: '#8a96a8', fontSize: '0.82rem', marginBottom: 16, height: 18 }}>
-        {isThinking ? 'Réflexion...' : isSpeaking ? 'Parle...' : isListening ? 'Je vous écoute...' : 'Assistante IA'}
+        {isThinking ? 'Réflexion...' : isSpeaking ? 'Parle...' : isListening && isHandsFree && !wakeWordHeard ? 'Dites "Hey Serena"...' : isListening && wakeWordHeard ? 'Je vous écoute!' : isListening ? 'Je vous écoute...' : 'Assistante IA'}
       </p>
 
       {/* Conversation */}
@@ -613,7 +671,7 @@ export default function VoiceAssistant({
         )}
       </button>
       <p style={{ color: '#6a7a8a', fontSize: '0.72rem', marginTop: 6 }}>
-        {isListening ? 'Appuyez pour arrêter' : 'Appuyez pour parler'}
+        {isListening && isHandsFree ? '"Hey Serena" pour commander' : isListening ? 'Appuyez pour arrêter' : 'Appuyez pour parler'}
       </p>
 
       {/* Quick commands */}
