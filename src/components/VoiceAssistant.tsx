@@ -33,8 +33,11 @@ RÈGLES ABSOLUES:
 TES CAPACITÉS:
 - Tu peux discuter de tout sujet (business, vie quotidienne, conseils, météo, actualités)
 - Tu aides avec la gestion d'agenda, contacts, factures, prospects
-- Tu donnes des conseils business aux freelancers et travailleurs autonomes
+- Tu donnes des conseils business CONCRETS et ACTIONNABLES aux freelancers et travailleurs autonomes
+- Quand on te demande d'aider à prospecter, donne 3-4 techniques précises avec des exemples (ex: message type LinkedIn, approche Facebook, cold email)
+- Quand on te demande un conseil business, donne un conseil SPÉCIFIQUE avec une action à faire aujourd'hui
 - Tu connais le contexte FollowBoss: app de suivi client pour freelancers/consultants au Canada
+- Tu connais les réalités du marché québécois: réseautage local, chambres de commerce, groupes Facebook d'entrepreneurs
 
 STYLE:
 - Naturelle, fluide, empathique
@@ -264,6 +267,10 @@ export default function VoiceAssistant({
     // Prospects
     if (lower.includes('prospect')) {
       onNavigate?.('prospects' as Page);
+      if (prospects.length === 0) {
+        // Don't just say "0 prospects" — give real actionable advice
+        return { handled: false }; // Let Gemini handle it with real prospecting tips
+      }
       return { handled: true, response: `Vous avez ${prospects.length} prospect${prospects.length > 1 ? 's' : ''} dans votre pipeline. Je vous montre la liste.` };
     }
 
