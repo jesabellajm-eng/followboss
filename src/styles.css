@@ -363,7 +363,7 @@ textarea.input-premium { resize: vertical; min-height: 80px; }
   border: 1px solid rgba(56,189,248,0.1);
   border-top: 1px solid rgba(56,189,248,0.2);
   border-radius: 14px;
-  padding: 18px 18px 22px;
+  padding: 14px 14px 16px;
   overflow: hidden;
   transition: border-color 0.25s ease, background 0.25s ease;
 }
@@ -390,8 +390,8 @@ textarea.input-premium { resize: vertical; min-height: 80px; }
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(56,189,248,0.08);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 14px;
+  padding: 16px 16px 18px;
   overflow: hidden;
   transition: all 0.25s ease;
 }
@@ -492,9 +492,9 @@ textarea.input-premium { resize: vertical; min-height: 80px; }
 ═══════════════════════════════ */
 
 /* Grid utility classes */
-.grid-stats-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.grid-stats-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
 .grid-stats-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .grid-form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .grid-calendar { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
@@ -528,7 +528,7 @@ textarea.input-premium { resize: vertical; min-height: 80px; }
 
   .page-container { padding: 12px; }
 
-  .hud-panel { padding: 14px 14px 18px; }
+  .hud-panel { padding: 10px 12px 14px; }
   .hud-panel .stat-value { font-size: 1.6rem !important; }
 
   .btn-cockpit { padding: 9px 16px; font-size: 0.82rem; }

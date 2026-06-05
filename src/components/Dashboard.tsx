@@ -114,7 +114,7 @@ export default function Dashboard({ followUps, onNavigate }: DashboardProps) {
         <div className="page-container">
 
           {/* ── HERO HEADER ── */}
-          <div style={{ paddingTop: 36, paddingBottom: 32 }}>
+          <div style={{ paddingTop: 28, paddingBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 20 }}>
               <div>
                 {/* Eyebrow */}
@@ -148,19 +148,19 @@ export default function Dashboard({ followUps, onNavigate }: DashboardProps) {
 
           {/* ── STATS GRID — HUD PANELS ── */}
           <div className="grid-stats-5" style={{
-            marginBottom: 24,
+            marginBottom: 20,
           }}>
             {stats.map((s, i) => (
               <div key={i} className="hud-panel" style={{ '--panel-color': s.color } as any}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
                   <span style={{ color: s.color, opacity: 0.8 }}>{s.icon}</span>
                   <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1.2 }}>{s.label}</span>
                 </div>
                 <div style={{
-                  fontSize: '2.2rem', fontWeight: 800, color: '#e8edf5',
+                  fontSize: '1.7rem', fontWeight: 800, color: '#e8edf5',
                   letterSpacing: -1, lineHeight: 1,
                 }}>{s.value}</div>
-                <div style={{ fontSize: '0.73rem', color: 'rgba(255,255,255,0.28)', marginTop: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.sub}</div>
+                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', marginTop: 5, textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.sub}</div>
                 {/* Bottom glow line */}
                 <div style={{
                   position: 'absolute', bottom: 0, left: 0, right: 0, height: 2,
@@ -176,7 +176,7 @@ export default function Dashboard({ followUps, onNavigate }: DashboardProps) {
 
             {/* Priorités du jour */}
             <div className="hud-card">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <AlertTriangle size={14} style={{ color: '#fbbf24' }} />
                 <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,0.35)' }}>
                   Priorités du jour
@@ -190,7 +190,7 @@ export default function Dashboard({ followUps, onNavigate }: DashboardProps) {
                 )}
               </div>
               {topPriority.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '28px 0', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
+                <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
                   <div style={{ fontSize: '1.5rem', marginBottom: 10, opacity: 0.4 }}>✓</div>
                   Aucune relance en cours
                 </div>
@@ -199,7 +199,7 @@ export default function Dashboard({ followUps, onNavigate }: DashboardProps) {
                   {topPriority.map(f => (
                     <div key={f.id} style={{
                       display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '10px 14px', borderRadius: 10,
+                      padding: '8px 12px', borderRadius: 10,
                       background: 'rgba(255,255,255,0.03)',
                       border: '1px solid rgba(255,255,255,0.06)',
                       borderLeft: `2px solid ${f.priority === 'haute' ? '#f87171' : f.priority === 'moyenne' ? '#fbbf24' : '#34d399'}`,
@@ -225,7 +225,7 @@ export default function Dashboard({ followUps, onNavigate }: DashboardProps) {
 
             {/* Activité récente */}
             <div className="hud-card">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <TrendingUp size={14} style={{ color: '#38bdf8' }} />
                 <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,0.35)' }}>
                   Activité récente
