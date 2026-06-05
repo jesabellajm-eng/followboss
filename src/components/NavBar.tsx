@@ -37,7 +37,7 @@ export default function NavBar({ currentPage, onNavigate, urgentCount = 0, devis
     <div className="nav-container">
       <div className="nav-inner">
         <span className="nav-brand" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-          <img src={logoSrc} alt="FollowBoss" style={{ height: 70, objectFit: 'contain' as const }} />
+          <img src={logoSrc} alt="FollowBoss" style={{ height: 50, objectFit: 'contain' as const }} />
         </span>
         {navItems.map((item) => (
           <button
