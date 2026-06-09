@@ -24,9 +24,9 @@ export default function Pricing() {
   }, []);
 
   const stripeLinks = {
-    mensuel: "https://buy.stripe.com/test_8x2fZib6kbLebGn8ZygMw00",
-    fondateurs: "https://buy.stripe.com/test_3cI3cwfmA6qU39R0t2gMw01",
-    annuel: "https://buy.stripe.com/test_bJe8wQ3DSdTm8ub2BagMw02",
+    mensuel: "https://buy.stripe.com/aFafZiflD7N723FfLme3e0b",
+    fondateurs: "https://buy.stripe.com/4gM4gAgpH9VffUv6aMe3e0c",
+    annuel: "https://buy.stripe.com/14AcN68Xf3wR8s3bv6e3e0d",
   };
 
   const handleCTA = (plan: string) => {
