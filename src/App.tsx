@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { useAuth } from './lib/AuthContext';
 import * as db from './lib/database';
 import type { FollowUp, FollowUpStatus, Page, Appointment, Invoice, Prospect } from './types';
@@ -194,7 +195,9 @@ export default function App() {
   const showTrialBanner = !isPro && trialDaysLeft > 0 && trialDaysLeft <= 7;
 
   return (
-    <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", minHeight: '100vh', background: '#04050a' }}>
+    <>
+      <Analytics />
+      <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", minHeight: '100vh', background: '#04050a' }}>
       {showTrialBanner && (
         <div style={{
           background: 'linear-gradient(90deg, rgba(251,191,36,0.15), rgba(248,113,113,0.15))',
@@ -281,6 +284,7 @@ export default function App() {
           />
         )}
       </main>
-    </div>
+      </div>
+    </>
   );
 }
