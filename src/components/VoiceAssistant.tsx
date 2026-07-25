@@ -58,6 +58,35 @@ STYLE DE CONVERSATION:
 - Tu peux taquiner gentiment ou faire un petit clin d'œil humour
 - Tu t'intéresses VRAIMENT à la personne — tu poses des questions de suivi parfois`;
 
+const RECEPTIONIST_PROMPT = `Tu es Serena, la réceptionniste professionnelle. Tu réponds au téléphone pour une travailleuse autonome.
+
+COMPORTEMENT:
+- Tu parles naturellement en français québécois, chaleureuse et professionnelle
+- Tu VOUVOIES toujours
+- Tu es accueillante mais efficace — tu ne perds pas le temps du client
+- Tu t'adaptes: si la personne est pressée, sois concise. Si elle veut jaser, sois aimable
+
+TON FLOW DE CONVERSATION:
+1. D'abord tu te présentes et dis que la patronne est occupée
+2. Tu proposes de prendre un message
+3. Tu demandes le NOM de la personne
+4. Tu demandes un NUMÉRO pour rappeler
+5. Tu demandes s'il y a un MESSAGE particulier
+6. Tu confirmes tout et rassures que le message sera transmis rapidement
+
+EXEMPLES DE PHRASES NATURELLES:
+- "Bonjour, merci d'avoir appelé! Malheureusement, elle est en rendez-vous présentement. Est-ce que je peux prendre un message pour vous?"
+- "Bien sûr! C'est à quel nom, s'il vous plaît?"
+- "Parfait [nom]! Est-ce que je peux avoir un numéro pour qu'elle vous rappelle?"
+- "C'est noté! Est-ce qu'il y a un message en particulier que vous aimeriez que je lui transmette?"
+- "Parfait, j'ai tout noté. Je m'assure qu'elle vous rappelle dès que possible. Bonne journée!"
+
+RÈGLES:
+- Garde les réponses courtes (1-3 phrases max)
+- Ne mentionne JAMAIS que tu es une IA/robot
+- Si quelqu'un demande des détails business, dis que la patronne pourra mieux répondre quand elle rappellera
+- Sois naturelle, pas robotique`;
+
 export default function VoiceAssistant({ 
   appointments = [], 
   invoices = [], 
@@ -82,10 +111,17 @@ export default function VoiceAssistant({
   const handsFreeTimeoutRef = useRef<any>(null);
   const isHandsFreeRef = useRef(false);
   const isSpeakingRef = useRef(false);
+  const [isReceptionist, setIsReceptionist] = useState(false);
+  const isReceptionistRef = useRef(false);
+  const [receptionistMessages, setReceptionistMessages] = useState<{name: string; phone: string; message: string; time: string}[]>([]);
+  const [showMessages, setShowMessages] = useState(false);
+  const receptionistStepRef = useRef<'greeting'|'name'|'phone'|'message'|'confirm'>('greeting');
+  const currentMessageRef = useRef<{name: string; phone: string; message: string}>({name: '', phone: '', message: ''});
 
   // Keep refs in sync
   useEffect(() => { isHandsFreeRef.current = isHandsFree; }, [isHandsFree]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
+  useEffect(() => { isReceptionistRef.current = isReceptionist; }, [isReceptionist]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -412,19 +448,95 @@ export default function VoiceAssistant({
     }
   };
 
+  const handleReceptionistInput = async (text: string): Promise<string> => {
+    const step = receptionistStepRef.current;
+    
+    if (step === 'greeting') {
+      receptionistStepRef.current = 'name';
+      const greetings = [
+        "Bonjour, merci d'avoir appelé! Malheureusement, elle est en rendez-vous présentement. Est-ce que je peux prendre un message pour qu'elle vous rappelle?",
+        "Bonjour! Elle n'est pas disponible pour le moment, mais je peux prendre vos coordonnées pour qu'elle vous rappelle. Ça vous va?",
+        "Allô, bonjour! Elle est occupée en ce moment. Est-ce que je peux prendre votre nom et votre numéro? Elle va vous rappeler dès que possible!",
+      ];
+      return greetings[Math.floor(Math.random() * greetings.length)];
+    }
+    
+    if (step === 'name') {
+      // Extract name from response - just use what they said
+      const cleaned = text.replace(/^(je m'appelle |mon nom (c'est|est) |c'est |oui,? )/i, '').trim();
+      currentMessageRef.current.name = cleaned;
+      receptionistStepRef.current = 'phone';
+      const responses = [
+        `Merci ${cleaned}! Est-ce que je peux avoir un numéro pour qu'elle vous rappelle?`,
+        `Parfait ${cleaned}! Quel numéro elle peut utiliser pour vous rejoindre?`,
+        `Enchanté ${cleaned}! Vous avez un numéro de téléphone pour le rappel?`,
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+    
+    if (step === 'phone') {
+      // Extract phone - keep whatever they said
+      const phoneClean = text.replace(/mon (numéro|cell|téléphone)( c'est| est)? /i, '').trim();
+      currentMessageRef.current.phone = phoneClean;
+      receptionistStepRef.current = 'message';
+      const responses = [
+        `C'est noté! Est-ce qu'il y a un message en particulier que vous aimeriez que je lui transmette?`,
+        `Parfait, j'ai le numéro. Est-ce qu'il y a quelque chose de spécifique que vous vouliez lui dire?`,
+        `Merci! Avez-vous un message à lui laisser ou c'est juste pour un rappel?`,
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+    
+    if (step === 'message') {
+      const lower = text.toLowerCase();
+      if (lower.includes('non') || lower.includes('pas de message') || lower.includes('juste rappeler') || lower.includes('c\'est tout') || lower.includes('c\'est correct')) {
+        currentMessageRef.current.message = 'Demande de rappel seulement';
+      } else {
+        currentMessageRef.current.message = text;
+      }
+      
+      // Save the message
+      const newMsg = {
+        name: currentMessageRef.current.name,
+        phone: currentMessageRef.current.phone,
+        message: currentMessageRef.current.message,
+        time: new Date().toLocaleString('fr-CA', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }),
+      };
+      setReceptionistMessages(prev => [...prev, newMsg]);
+      
+      // Reset for next caller
+      receptionistStepRef.current = 'greeting';
+      currentMessageRef.current = { name: '', phone: '', message: '' };
+      
+      const responses = [
+        `Parfait, j'ai tout noté! Je m'assure qu'elle reçoit votre message et qu'elle vous rappelle le plus vite possible. Merci ${newMsg.name}, bonne journée!`,
+        `C'est noté ${newMsg.name}! Elle va vous rappeler dès qu'elle est libre. Merci d'avoir appelé, passez une belle journée!`,
+        `Tout est pris en note! ${newMsg.name}, elle devrait vous rappeler sous peu. Merci beaucoup et bonne fin de journée!`,
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+    
+    return "Je suis désolée, je n'ai pas bien compris. On recommence?";
+  };
+
   const processUserInput = async (text: string) => {
     if (!text.trim()) return;
 
     setConversation(prev => [...prev, { role: 'user', text }]);
     setIsThinking(true);
 
-    const actionResult = checkForActions(text);
     let response: string;
 
-    if (actionResult.handled) {
-      response = actionResult.response!;
+    if (isReceptionistRef.current) {
+      // In receptionist mode - handle the flow
+      response = await handleReceptionistInput(text);
     } else {
-      response = await askGemini(text);
+      const actionResult = checkForActions(text);
+      if (actionResult.handled) {
+        response = actionResult.response!;
+      } else {
+        response = await askGemini(text);
+      }
     }
 
     setIsThinking(false);
@@ -563,6 +675,25 @@ export default function VoiceAssistant({
       setIsHandsFree(true);
       isHandsFreeRef.current = true;
       const msg = "Bon, mains-libres activé! Vous avez juste à dire Hey Serena pis votre demande. Parfait quand vous êtes sur la route.";
+      setConversation(prev => [...prev, { role: 'serena', text: msg }]);
+      speak(msg);
+    }
+  };
+
+  const toggleReceptionist = () => {
+    if (isReceptionist) {
+      setIsReceptionist(false);
+      isReceptionistRef.current = false;
+      receptionistStepRef.current = 'greeting';
+      currentMessageRef.current = { name: '', phone: '', message: '' };
+      const msg = "Mode réceptionniste désactivé. Je redeviens votre assistante personnelle!";
+      setConversation(prev => [...prev, { role: 'serena', text: msg }]);
+      speak(msg);
+    } else {
+      setIsReceptionist(true);
+      isReceptionistRef.current = true;
+      receptionistStepRef.current = 'greeting';
+      const msg = "Mode réceptionniste activé! Je vais accueillir vos clients, prendre leurs messages et leurs coordonnées. Vous n'avez qu'à passer le téléphone quand quelqu'un appelle.";
       setConversation(prev => [...prev, { role: 'serena', text: msg }]);
       speak(msg);
     }
@@ -737,6 +868,7 @@ export default function VoiceAssistant({
             'Donne-moi un conseil business',
             'Comment ça va Serena?',
             'Aide-moi à prospecter',
+            'Nouveau client au téléphone',
           ].map(cmd => (
             <button key={cmd} onClick={() => processUserInput(cmd)} style={{
               padding: '5px 11px', borderRadius: 18,
